@@ -22,6 +22,12 @@ jobs:
           java-version: '17'
           architecture: 'x64'
 
+      - name: Prepare resources
+        run: |
+          mkdir -p composeApp/src/commonMain/resources/icons
+          cp .github/resources/icon.ico composeApp/src/commonMain/resources/icons/ || true
+          cp .github/resources/icon.icns composeApp/src/commonMain/resources/icons/ || true
+
       - name: Grant execute permission for gradlew
         if: runner.os != 'Windows'
         run: chmod +x gradlew
@@ -32,22 +38,34 @@ jobs:
 
       - name: Build macOS DMG
         if: runner.os == 'macOS'
-        run: ./gradlew packageDmg --no-daemon
+        run: ./gradlew packageDmg --stacktrace --info --no-daemon
 
       - name: Build Windows MSI
         if: runner.os == 'Windows'
-        run: ./gradlew packageMsi --no-daemon
+        run: ./gradlew packageMsi --stacktrace --info --no-daemon
 
       - name: Upload macOS Artifact
-        if: runner.os == 'macOS'
+        if: runner.os == 'macOS' && success()
         uses: actions/upload-artifact@v3
         with:
           name: ENDEcode-macos
           path: composeApp/build/compose/binaries/main/dmg/ENDEcode-*.dmg
+          if-no-files-found: error
 
       - name: Upload Windows Artifact
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && success()
         uses: actions/upload-artifact@v3
         with:
           name: ENDEcode-windows
           path: composeApp/build/compose/binaries/main/msi/ENDEcode-*.msi
+          if-no-files-found: error
+
+      - name: Upload Build Logs
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-logs-${{ matrix.os }}
+          path: |
+            composeApp/build/reports/
+            composeApp/build/logs/
+            **/hs_err_pid*.log

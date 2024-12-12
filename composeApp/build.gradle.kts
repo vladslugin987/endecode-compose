@@ -17,7 +17,7 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.ui)
             implementation(compose.components.resources)
-            implementation(compose.preview)  // Заменили uiToolingPreview на preview
+            implementation(compose.preview)
             implementation(compose.material3)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
@@ -42,6 +42,11 @@ kotlin {
     }
 }
 
+// Define icon paths
+val iconsDir = project.file("src/commonMain/resources/icons")
+val macIcon = iconsDir.resolve("icon.icns")
+val winIcon = iconsDir.resolve("icon.ico")
+
 compose.desktop {
     application {
         mainClass = "org.example.project.MainKt"
@@ -58,7 +63,7 @@ compose.desktop {
                 bundleID = "com.vsdev.endecode"
                 appCategory = "public.app-category.productivity"
                 dockName = "ENDEcode"
-                iconFile.set(project.file("icon.icns"))
+                iconFile.set(macIcon)
 
                 infoPlist {
                     extraKeysRawXml = """
@@ -80,7 +85,7 @@ compose.desktop {
             windows {
                 menuGroup = "ENDEcode"
                 upgradeUuid = "61DAB35E-17B1-4B61-B6E3-9CD413D5AA96"
-                iconFile.set(project.file("icon.ico"))
+                iconFile.set(winIcon)
                 dirChooser = true
                 perUserInstall = true
                 shortcut = true
