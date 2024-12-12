@@ -35,7 +35,7 @@ A modern file encryption and watermarking tool built with Compose Multiplatform
 
 ## 🚀 Installation
 
-1. Download the latest DMG from the [Releases](https://github.com/vslugin/endecode-compose/releases) page
+1. Download the latest DMG from the [Releases](https://github.com/vladslugin987/endecode-compose/releases) page
 2. Open the DMG file
 3. Drag ENDEcode to your Applications folder
 4. Launch the application
