@@ -3,7 +3,6 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
 }
 
 kotlin {
@@ -47,7 +46,7 @@ compose.desktop {
         mainClass = "org.example.project.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg)
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi)
             packageName = "ENDEcode"
             packageVersion = "2.0.0"
             description = "File encryption and watermarking tool"
@@ -58,11 +57,8 @@ compose.desktop {
                 bundleID = "com.vsdev.endecode"
                 appCategory = "public.app-category.productivity"
                 dockName = "ENDEcode"
-
                 iconFile.set(project.file("icon.icns"))
 
-
-                // macOS specific settings
                 infoPlist {
                     extraKeysRawXml = """
                         <key>LSMinimumSystemVersion</key>
@@ -80,13 +76,53 @@ compose.desktop {
                 }
             }
 
-            // Required Java modules
+            windows {
+                menuGroup = "ENDEcode"
+                upgradeUuid = "61DAB35E-17B1-4B61-B6E3-9CD413D5AA96"
+                iconFile.set(project.file("icon.ico"))
+                dirChooser = true
+                perUserInstall = true
+                shortcut = true
+                menuGroup = "ENDEcode"
+                jvmArgs += listOf("-Dfile.encoding=UTF-8")
+            }
+
+            // Common options for all platforms
             modules("java.sql", "java.naming", "jdk.unsupported")
+
+            // JVM options
+            jvmArgs += listOf(
+                "-Xms512m",
+                "-Xmx2048m",
+                "--add-opens", "java.desktop/sun.awt=ALL-UNNAMED",
+                "--add-opens", "java.desktop/java.awt.peer=ALL-UNNAMED",
+                "-XX:+UseG1GC",
+                "-XX:+UseStringDeduplication",
+                "-Dfile.encoding=UTF-8"
+            )
         }
     }
 }
 
 tasks.withType<JavaExec> {
-    jvmArgs("--add-opens", "java.desktop/sun.awt=ALL-UNNAMED")
-    jvmArgs("--add-opens", "java.desktop/java.awt.peer=ALL-UNNAMED")
+    jvmArgs(
+        "--add-opens", "java.desktop/sun.awt=ALL-UNNAMED",
+        "--add-opens", "java.desktop/java.awt.peer=ALL-UNNAMED"
+    )
+}
+
+tasks.register("cleanDist") {
+    group = "build"
+    description = "Cleans the distribution directory"
+    doLast {
+        delete(project.buildDir.resolve("compose/binaries"))
+    }
+}
+
+tasks.named("clean") {
+    dependsOn("cleanDist")
+}
+
+tasks.named("build") {
+    dependsOn("createDistributable")
 }
