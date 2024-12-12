@@ -70,20 +70,21 @@ Check out the [Python version](https://github.com/vladslugin987/endecode) of END
 ### System Information
 
 ```
-       /\         OS: macOS 13.0 or later
-      /  \        UI: Compose Multiplatform
-     /    \       Language: Kotlin
-    /      \      Framework: Compose Desktop
-   /   ㋡   \     Version: 2.0.0
-  /          \    Author: vsdev
- /            \   
-/_____    _____\  
-     /    \       
-    /      \      
-   /        \     
-  /          \    
- /__________\_\   
+              /\                OS: macOS 13.0 or later
+             /  \               UI: Compose Multiplatform
+            /    \              Language: Kotlin
+           /      \             Framework: Compose Desktop
+          /   ㋡   \            Version: 2.0.0
+         /          \           Author: vsdev
+        /            \          
+       /_____    _____\        
+            /    \             
+           /      \            
+          /        \           
+         /          \          
+        /__________\_\         
 ```
+
 
 ---
 Made with ❤️ by vsdev.
