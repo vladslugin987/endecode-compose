@@ -11,12 +11,13 @@ kotlin {
     sourceSets {
         val desktopMain by getting
 
+        @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.ui)
             implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
+            implementation(compose.preview)  // Заменили uiToolingPreview на preview
             implementation(compose.material3)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
@@ -83,7 +84,6 @@ compose.desktop {
                 dirChooser = true
                 perUserInstall = true
                 shortcut = true
-                menuGroup = "ENDEcode"
                 jvmArgs += listOf("-Dfile.encoding=UTF-8")
             }
 

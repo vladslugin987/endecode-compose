@@ -1,4 +1,4 @@
-name: Build Multi-Platform Apps
+name: Build Desktop Apps
 
 on:
   push:
@@ -9,7 +9,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -30,23 +30,13 @@ jobs:
         if: runner.os == 'macOS'
         run: softwareupdate --install-rosetta --agree-to-license
 
-      - name: Install Linux Dependencies
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgl1-mesa-dev xorg-dev
-
       - name: Build macOS DMG
         if: runner.os == 'macOS'
-        run: ./gradlew packageDmg
+        run: ./gradlew packageDmg --no-daemon
 
-      - name: Build Windows EXE
+      - name: Build Windows MSI
         if: runner.os == 'Windows'
-        run: ./gradlew packageMsi
-
-      - name: Build Linux DEB
-        if: runner.os == 'Linux'
-        run: ./gradlew packageDeb
+        run: ./gradlew packageMsi --no-daemon
 
       - name: Upload macOS Artifact
         if: runner.os == 'macOS'
@@ -61,10 +51,3 @@ jobs:
         with:
           name: ENDEcode-windows
           path: composeApp/build/compose/binaries/main/msi/ENDEcode-*.msi
-
-      - name: Upload Linux Artifact
-        if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v3
-        with:
-          name: ENDEcode-linux
-          path: composeApp/build/compose/binaries/main/deb/endecode_*.deb
