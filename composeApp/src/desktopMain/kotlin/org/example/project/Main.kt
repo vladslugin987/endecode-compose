@@ -9,19 +9,31 @@ import androidx.compose.ui.window.rememberWindowState
 import org.example.project.ui.components.showInfo
 import org.example.project.ui.screens.HomeScreen
 import org.example.project.ui.theme.AppTheme
+import java.awt.Toolkit
 
-fun main() = application {
-    Window(
-        onCloseRequest = ::exitApplication,
-        title = "ENDEcode v2.0.0",
-        state = rememberWindowState(size = DpSize(1024.dp, 768.dp))
-    ) {
-        LaunchedEffect(Unit) {
-            showInfo()
-        }
+fun main() {
+    System.setProperty("sun.java2d.uiScale", "1.0")
 
-        AppTheme {
-            HomeScreen(window)
+    val scaleFactor = Toolkit.getDefaultToolkit().screenResolution / 96.0
+
+    val windowWidth = (1024 / scaleFactor).dp
+    val windowHeight = (768 / scaleFactor).dp
+
+    application {
+        Window(
+            onCloseRequest = ::exitApplication,
+            title = "ENDEcode v2.0.1",
+            state = rememberWindowState(size = DpSize(windowWidth, windowHeight))
+        ) {
+            window.rootPane.putClientProperty("apple.awt.contentScaleFactor", 1.0f)
+
+            LaunchedEffect(Unit) {
+                showInfo()
+            }
+
+            AppTheme {
+                HomeScreen(window)
+            }
         }
     }
 }
