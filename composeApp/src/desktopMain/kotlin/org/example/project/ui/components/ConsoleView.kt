@@ -107,11 +107,11 @@ fun showInfo() {
     ConsoleState.log(line)
     ConsoleState.log("""
                     ENDEcode by vsdev.
-                      [v2.0.0]
+                      [v2.0.2]
 
 OS              MacOS
 Language        Kotlin
-Updated         December 11, 2024
+Updated         December 17, 2024
 Author          vsdev. | Vladislav Slugin
 Contact         vslugin@vsdev.top
 

@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.*
+import kotlinx.coroutines.swing.Swing
 import mu.KotlinLogging
 import java.io.File
 import org.example.project.utils.*
@@ -26,7 +27,7 @@ class HomeViewModel {
     var progress by mutableStateOf(0f)
         private set
 
-    private val scope = CoroutineScope(Dispatchers.Main)
+    private val scope = CoroutineScope(Dispatchers.Swing)
     private var currentJob: Job? = null
 
     // Update functions
@@ -118,7 +119,7 @@ class HomeViewModel {
                             logger.error(e) { "Error processing file ${file.name}" }
                         }
                     }
-                    withContext(Dispatchers.Main) {
+                    withContext(Dispatchers.Swing) {
                         progress = (index + 1).toFloat() / files.size
                     }
                 }

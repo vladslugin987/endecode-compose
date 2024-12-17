@@ -82,7 +82,7 @@ Check out the [Python version](https://github.com/vladslugin987/endecode) of END
 > **UI**: Compose Multiplatform  
 > **Language**: Kotlin  
 > **Framework**: Compose Desktop  
-> **Version**: 2.0.0  
+> **Version**: 2.0.2  
 > **Author**: vsdev
 
 ---
