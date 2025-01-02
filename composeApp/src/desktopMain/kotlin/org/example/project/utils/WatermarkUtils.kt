@@ -13,6 +13,12 @@ object WatermarkUtils {
     private val WATERMARK_START = "<<==".toByteArray(Charsets.UTF_8)
     private val WATERMARK_END = "==>>".toByteArray(Charsets.UTF_8)
 
+    private data class WatermarkInfo(
+        val startPosition: Int,
+        val endPosition: Int,
+        val content: ByteArray? = null
+    )
+
     /**
      * Removes invisible watermarks from files in a directory
      */
@@ -54,42 +60,11 @@ object WatermarkUtils {
      * Extracts the encoded text from the watermark
      */
     suspend fun extractWatermarkText(file: File): String? = withContext(Dispatchers.IO) {
-        RandomAccessFile(file, "r").use { randomAccessFile ->
-            try {
-                // Get the file size
-                val fileSize = randomAccessFile.length()
-                if (fileSize < MAX_WATERMARK_LENGTH) {
-                    return@use null
+        readWatermarkData(file)?.let { (tailData, _) ->
+            findWatermark(tailData, includeContent = true)?.content?.let {
+                String(it, Charsets.UTF_8).also { text ->
+                    logger.info { "Found watermark in ${file.name}: $text" }
                 }
-
-                // Read the last MAX_WATERMARK_LENGTH bytes
-                val readLength = MAX_WATERMARK_LENGTH.coerceAtMost(fileSize.toInt())
-                randomAccessFile.seek(fileSize - readLength)
-                val tailData = ByteArray(readLength)
-                randomAccessFile.read(tailData)
-
-                // Looking for watermark signatures
-                val watermarkStart = findLastIndex(tailData, WATERMARK_START)
-                if (watermarkStart == -1) return@use null
-
-                val watermarkEnd = findIndex(tailData, WATERMARK_END, watermarkStart)
-                if (watermarkEnd == -1) return@use null
-
-                // Extract the watermark text
-                if (watermarkEnd > watermarkStart) {
-                    val watermarkText = tailData.slice(
-                        (watermarkStart + WATERMARK_START.size) until watermarkEnd
-                    ).toByteArray()
-
-                    val extractedText = String(watermarkText, Charsets.UTF_8)
-                    logger.info { "Found watermark in ${file.name}: $extractedText" }
-                    return@use extractedText
-                }
-
-                null
-            } catch (e: Exception) {
-                logger.error(e) { "Error extracting watermark from ${file.name}" }
-                null
             }
         }
     }
@@ -98,26 +73,9 @@ object WatermarkUtils {
      * Checks for the presence of a watermark in the file
      */
     suspend fun hasWatermark(file: File): Boolean = withContext(Dispatchers.IO) {
-        RandomAccessFile(file, "r").use { randomAccessFile ->
-            try {
-                val fileSize = randomAccessFile.length()
-                if (fileSize < MAX_WATERMARK_LENGTH) return@use false
-
-                val readLength = MAX_WATERMARK_LENGTH.coerceAtMost(fileSize.toInt())
-                randomAccessFile.seek(fileSize - readLength)
-                val tailData = ByteArray(readLength)
-                randomAccessFile.read(tailData)
-
-                val watermarkStart = findLastIndex(tailData, WATERMARK_START)
-                if (watermarkStart == -1) return@use false
-
-                val watermarkEnd = findIndex(tailData, WATERMARK_END, watermarkStart)
-                watermarkEnd != -1 && watermarkEnd > watermarkStart
-            } catch (e: Exception) {
-                logger.error(e) { "Error checking watermark in ${file.name}" }
-                false
-            }
-        }
+        readWatermarkData(file)?.let { (tailData, _) ->
+            findWatermark(tailData) != null
+        } ?: false
     }
 
     /**
@@ -149,37 +107,16 @@ object WatermarkUtils {
      * Removes a watermark from a specific file
      */
     private suspend fun removeWatermarkFromFile(file: File): Boolean = withContext(Dispatchers.IO) {
+        val (tailData, fileSize) = readWatermarkData(file) ?: return@withContext false
+
+        val watermarkInfo = findWatermark(tailData) ?: return@withContext false
+
         RandomAccessFile(file, "rw").use { randomAccessFile ->
             try {
-                // getting file size
-                val fileSize = randomAccessFile.length()
-                if (fileSize < MAX_WATERMARK_LENGTH) {
-                    return@use false
-                }
-
-                // Read the last MAX_WATERMARK_LENGTH bytes
-                val readLength = MAX_WATERMARK_LENGTH.coerceAtMost(fileSize.toInt())
-                randomAccessFile.seek(fileSize - readLength)
-                val tailData = ByteArray(readLength)
-                randomAccessFile.read(tailData)
-
-                // Looking for watermark signatures
-                val watermarkStart = findLastIndex(tailData, WATERMARK_START)
-                if (watermarkStart == -1) return@use false
-
-                val watermarkEnd = findIndex(tailData, WATERMARK_END, watermarkStart)
-                if (watermarkEnd == -1) return@use false
-
-                // Check that the watermark is found correctly
-                if (watermarkEnd > watermarkStart) {
-                    // Calculate the position to trim the file
-                    val watermarkPosition = fileSize - (readLength - watermarkStart)
-                    randomAccessFile.setLength(watermarkPosition)
-                    logger.info { "Removed watermark from ${file.name}" }
-                    return@use true
-                }
-
-                false
+                val watermarkPosition = fileSize - (tailData.size - watermarkInfo.startPosition)
+                randomAccessFile.setLength(watermarkPosition)
+                logger.info { "Removed watermark from ${file.name}" }
+                true
             } catch (e: Exception) {
                 logger.error(e) { "Error removing watermark from ${file.name}" }
                 false
@@ -188,36 +125,66 @@ object WatermarkUtils {
     }
 
     /**
-     * Searches for the last occurrence of the bytes array in data
+     * Reads the last MAX_WATERMARK_LENGTH bytes from a file
      */
-    private fun findLastIndex(data: ByteArray, bytes: ByteArray): Int {
-        for (i in data.size - bytes.size downTo 0) {
-            var found = true
-            for (j in bytes.indices) {
-                if (data[i + j] != bytes[j]) {
-                    found = false
-                    break
-                }
+    private suspend fun readWatermarkData(file: File): Pair<ByteArray, Long>? = withContext(Dispatchers.IO) {
+        RandomAccessFile(file, "r").use { randomAccessFile ->
+            try {
+                val fileSize = randomAccessFile.length()
+                if (fileSize < MAX_WATERMARK_LENGTH) return@use null
+
+                val readLength = MAX_WATERMARK_LENGTH.coerceAtMost(fileSize.toInt())
+                randomAccessFile.seek(fileSize - readLength)
+                val tailData = ByteArray(readLength)
+                randomAccessFile.read(tailData)
+
+                tailData to fileSize
+            } catch (e: Exception) {
+                logger.error(e) { "Error reading watermark data from ${file.name}" }
+                null
             }
-            if (found) return i
+        }
+    }
+
+    /**
+     * Looks for watermark signatures in byte array
+     */
+    private fun findWatermark(data: ByteArray, includeContent: Boolean = false): WatermarkInfo? {
+        val startPosition = findBytes(data, WATERMARK_START, reverse = true)
+        if (startPosition == -1) return null
+
+        val endPosition = findBytes(data, WATERMARK_END, startFrom = startPosition)
+        if (endPosition == -1 || endPosition <= startPosition) return null
+
+        val content = if (includeContent) {
+            data.slice((startPosition + WATERMARK_START.size) until endPosition).toByteArray()
+        } else null
+
+        return WatermarkInfo(startPosition, endPosition, content)
+    }
+
+    /**
+     * Searches for byte pattern in data array
+     * @param reverse if true, searches from end to start
+     * @param startFrom position to start search from
+     */
+    private fun findBytes(data: ByteArray, pattern: ByteArray, startFrom: Int = 0, reverse: Boolean = false): Int {
+        val range = if (reverse) {
+            (data.size - pattern.size) downTo startFrom
+        } else {
+            startFrom..data.size - pattern.size
+        }
+
+        for (i in range) {
+            if (data.matchesAt(i, pattern)) return i
         }
         return -1
     }
 
     /**
-     * Searches for the first occurrence of the bytes array in data, starting from the startFrom position
+     * Checks if byte array matches pattern at given position
      */
-    private fun findIndex(data: ByteArray, bytes: ByteArray, startFrom: Int): Int {
-        for (i in startFrom..data.size - bytes.size) {
-            var found = true
-            for (j in bytes.indices) {
-                if (data[i + j] != bytes[j]) {
-                    found = false
-                    break
-                }
-            }
-            if (found) return i
-        }
-        return -1
+    private fun ByteArray.matchesAt(pos: Int, pattern: ByteArray): Boolean {
+        return pattern.indices.all { this[pos + it] == pattern[it] }
     }
 }

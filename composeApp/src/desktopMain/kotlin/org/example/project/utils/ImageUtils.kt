@@ -109,48 +109,6 @@ object ImageUtils {
             false
         }
     }
-
-    /**
-     * Проверяет, есть ли видимый водяной знак на изображении
-     * TODO: delete it or improve it. idk..
-     */
-    suspend fun hasVisibleWatermark(imageFile: File): Boolean = withContext(Dispatchers.IO) {
-        try {
-            val image = Imgcodecs.imread(imageFile.absolutePath)
-            if (image.empty()) {
-                return@withContext false
-            }
-
-            // getting bottom part of the image
-            val bottomRegion = Mat(
-                image,
-                org.opencv.core.Rect(
-                    0,
-                    (image.rows() * 0.9).toInt(),
-                    image.cols(),
-                    (image.rows() * 0.1).toInt()
-                )
-            )
-
-            // Create a mask for white pixels
-            val mask = Mat()
-            val whiteThreshold = Mat(bottomRegion.size(), bottomRegion.type(), Scalar(250.0, 250.0, 250.0))
-            Core.compare(bottomRegion, whiteThreshold, mask, Core.CMP_GT)
-
-            val hasWhitePixels = Core.countNonZero(mask) > 0
-
-            // releasing resourcesß
-            mask.release()
-            whiteThreshold.release()
-            bottomRegion.release()
-            image.release()
-
-            hasWhitePixels
-        } catch (e: Exception) {
-            logger.error(e) { "Error checking watermark in image ${imageFile.name}" }
-            false
-        }
-    }
 }
 
 enum class TextPosition {

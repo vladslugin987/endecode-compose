@@ -14,7 +14,7 @@ private val logger = KotlinLogging.logger {}
 
 object BatchUtils {
     /**
-     * Основная функция для пакетного копирования и кодирования
+     * Main function for batch copying and encoding
      */
     suspend fun performBatchCopyAndEncode(
         sourceFolder: File,
@@ -135,9 +135,8 @@ object BatchUtils {
             val currentNum = orderNumber
             val swapNum = (orderNumber.toInt() + 100).toString().padStart(3, '0')
 
-            // templates for number lookup taking into account possible leading zeros
-            val currentNumRegex = "0*$currentNum"  // can find both 006 and 6
-            val swapNumRegex = "0*$swapNum"       // Находит как 106, так и 0106
+            val currentNumRegex = "0*$currentNum"
+            val swapNumRegex = "0*$swapNum"
 
             ConsoleState.log("Starting swap operation...")
             ConsoleState.log("Looking for files with numbers matching $currentNumRegex and $swapNumRegex")
