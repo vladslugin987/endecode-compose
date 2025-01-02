@@ -96,7 +96,6 @@ fun showInfo() {
     val width = 70
     val line = "=".repeat(width)
     ConsoleState.log(line)
-    // Обратите внимание на использование пробелов для выравнивания
     ConsoleState.log("""
 ███████╗███╗   ██╗██████╗ ███████╗ ██████╗ ██████╗ ██████╗ ███████╗
 ██╔════╝████╗  ██║██╔══██╗██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝
@@ -106,12 +105,12 @@ fun showInfo() {
 ╚══════╝╚═╝  ╚═══╝╚═════╝ ╚══════╝ ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝""".trimIndent())
     ConsoleState.log(line)
     ConsoleState.log("""
-                    ENDEcode by vsdev.
-                      [v2.0.2]
+                    EnDeCode by vsdev.
+                      [v2.0.8]
 
 OS              MacOS
 Language        Kotlin
-Updated         December 17, 2024
+Updated         January 2, 2025
 Author          vsdev. | Vladislav Slugin
 Contact         vslugin@vsdev.top
 

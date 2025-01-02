@@ -43,7 +43,7 @@ fun FileSelector(
         }
 
         val panel = JPanel().apply {
-            background = AWTColor(0, 0, 0, 0) // Прозрачная панель
+            background = AWTColor(0, 0, 0, 0)
             isOpaque = false
         }
         dndWindow.contentPane.add(panel)
