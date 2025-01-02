@@ -50,7 +50,7 @@ A modern file encryption and watermarking tool built with Compose Multiplatform
 
 ```bash
 # Clone the repository
-git clone https://github.com/vslugin/endecode-compose.git
+git clone https://github.com/vladslugin987/endecode-compose.git
 
 # Navigate to project directory
 cd endecode-compose
