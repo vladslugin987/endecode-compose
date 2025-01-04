@@ -1,4 +1,4 @@
-rootProject.name = "EnDeCode"
+rootProject.name = "ENDEcode"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {

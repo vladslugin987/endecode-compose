@@ -54,9 +54,9 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi)
             packageName = "ENDEcode"
-            packageVersion = "2.0.0"
+            packageVersion = "2.0.9"
             description = "File encryption and watermarking tool"
-            copyright = "© 2024 vsdev. All rights reserved."
+            copyright = "© 2025 vsdev. All rights reserved."
             vendor = "vsdev"
 
             macOS {
@@ -70,9 +70,9 @@ compose.desktop {
                         <key>LSMinimumSystemVersion</key>
                         <string>10.13</string>
                         <key>CFBundleVersion</key>
-                        <string>2.0.0</string>
+                        <string>2.0.9</string>
                         <key>CFBundleShortVersionString</key>
-                        <string>2.0.0</string>
+                        <string>2.0.9</string>
                         <key>LSArchitecturePriority</key>
                         <array>
                             <string>x86_64</string>

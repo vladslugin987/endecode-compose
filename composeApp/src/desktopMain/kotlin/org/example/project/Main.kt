@@ -22,7 +22,7 @@ fun main() {
     application {
         Window(
             onCloseRequest = ::exitApplication,
-            title = "EnDeCode Compose",
+            title = "ENDEcode Compose",
             state = rememberWindowState(size = DpSize(windowWidth, windowHeight))
         ) {
             window.rootPane.putClientProperty("apple.awt.contentScaleFactor", 1.0f)

@@ -82,8 +82,8 @@ Check out the [Python version](https://github.com/vladslugin987/endecode) of END
 > **UI**: Compose Multiplatform  
 > **Language**: Kotlin  
 > **Framework**: Compose Desktop  
-> **Version**: 2.0.2  
-> **Author**: vsdev
+> **Version**: 2.0.9
+> **Author**: vsdev. / Vladislav Slugin
 
 ---
 Made with ❤️ by vsdev.
