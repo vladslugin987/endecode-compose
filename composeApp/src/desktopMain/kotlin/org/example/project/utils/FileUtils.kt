@@ -14,6 +14,11 @@ object FileUtils {
         "txt", "jpg", "jpeg", "png", "mp4"
     )
 
+    // Video file formats
+    private val videoExtensions = setOf(
+        "mp4", "avi", "mov", "mkv"
+    )
+
     /**
      * Creates a copy of the directory with a new name
      */
@@ -65,5 +70,12 @@ object FileUtils {
      */
     fun isImageFile(file: File): Boolean {
         return file.extension.lowercase() in setOf("jpg", "jpeg", "png")
+    }
+
+    /**
+     * Checks if the file is a video
+     */
+    fun isVideoFile(file: File): Boolean {
+        return file.extension.lowercase() in videoExtensions
     }
 }

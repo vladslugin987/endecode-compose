@@ -28,7 +28,7 @@ object BatchUtils {
         progress: (Float) -> Unit
     ) = withContext(Dispatchers.IO) {
         try {
-            // create folder for copies
+            // Create main copies folder
             val copiesFolder = File(sourceFolder.parent, "${sourceFolder.name}-Copies")
             if (!copiesFolder.exists()) {
                 copiesFolder.mkdir()
@@ -37,7 +37,7 @@ object BatchUtils {
             val startNumber = extractStartNumber(baseText)
             val baseTextWithoutNumber = baseText.replace("\\d+$".toRegex(), "").trim()
 
-            // Calculate the total number of operations
+            // Calculate total operations
             val totalOperations = numCopies * (
                     1 + // copying
                             1 + // encoding
@@ -53,48 +53,47 @@ object BatchUtils {
             // First pass - create and process folders
             for (i in 0 until numCopies) {
                 val orderNumber = (startNumber + i).toString().padStart(3, '0')
-                val destinationFolder = File(copiesFolder, orderNumber)
-                val folderCopy = File(destinationFolder, sourceFolder.name)
+                val orderFolder = File(copiesFolder, orderNumber)
+                orderFolder.mkdir()
+
+                val destinationFolder = File(orderFolder, sourceFolder.name)
 
                 // Copy folder
-                FileUtils.copyDirectory(sourceFolder, folderCopy)
+                FileUtils.copyDirectory(sourceFolder, destinationFolder)
                 completedOperations++
                 progress(completedOperations / totalOperations)
 
-                // Encode files
-                val encodedText = "$baseTextWithoutNumber $orderNumber"
-                val watermark = EncodingUtils.addWatermark(encodedText)
-                FileUtils.getSupportedFiles(folderCopy).forEach { file ->
-                    EncodingUtils.processFile(file, watermark)
-                }
+                // Process files based on their type
+                processFiles(destinationFolder, baseTextWithoutNumber, orderNumber)
                 completedOperations++
                 progress(completedOperations / totalOperations)
 
-                // Add visible watermark if needed
+                // Add visible watermark if needed (only for images)
                 if (addWatermark) {
                     val actualPhotoNumber = photoNumber ?: orderNumber.toInt()
                     val actualWatermarkText = watermarkText ?: orderNumber
-                    addVisibleWatermarkToPhoto(folderCopy, actualWatermarkText, actualPhotoNumber)
+                    addVisibleWatermarkToPhoto(destinationFolder, actualWatermarkText, actualPhotoNumber)
                     completedOperations++
                     progress(completedOperations / totalOperations)
                 }
 
-                // Perform swap if needed
+                // Perform swap if needed (only for images)
                 if (addSwap) {
-                    performSwap(folderCopy, orderNumber)
+                    performSwap(destinationFolder, orderNumber)
                     completedOperations++
                     progress(completedOperations / totalOperations)
                 }
 
-                foldersToProcess.add(destinationFolder to orderNumber)
+                foldersToProcess.add(destinationFolder.parentFile to orderNumber)
                 ConsoleState.log("Processed folder: $orderNumber")
             }
 
-            // Second pass - create ZIP archives
+            // Second pass - create ZIP archives in numbered folders
             if (createZip) {
                 foldersToProcess.forEach { (folder, orderNumber) ->
-                    createNoCompressionZip(folder, orderNumber)
-                    folder.deleteRecursively()
+                    createNoCompressionZip(folder, folder.name)
+                    // Only delete the contents, keep the folder
+                    folder.listFiles()?.forEach { it.deleteRecursively() }
                     completedOperations++
                     progress(completedOperations / totalOperations)
                 }
@@ -106,6 +105,36 @@ object BatchUtils {
             ConsoleState.log("Error during batch processing: ${e.message}")
             throw e
         }
+    }
+
+    /**
+     * Process files based on their type (images or videos)
+     */
+    private suspend fun processFiles(folder: File, baseText: String, orderNumber: String) {
+        val files = FileUtils.getSupportedFiles(folder)
+        val encodedText = "$baseText $orderNumber"
+        val watermark = EncodingUtils.addWatermark(encodedText)
+
+        files.forEach { file ->
+            when {
+                FileUtils.isVideoFile(file) -> {
+                    // Only add invisible watermark to video files
+                    WatermarkUtils.addWatermark(file, encodedText)
+                }
+                else -> {
+                    // Process other files normally
+                    EncodingUtils.processFile(file, watermark)
+                }
+            }
+        }
+    }
+
+    /**
+     * Determines if number should be used for swapping based on base folder number
+     */
+    private fun shouldProcessNumberForSwap(fileNumber: Int, baseNumber: Int): Boolean {
+        val baseSeries = (baseNumber / 100) * 100
+        return fileNumber in (baseSeries + 1)..(baseSeries + 99)
     }
 
     /**
@@ -143,8 +172,8 @@ object BatchUtils {
      */
     private suspend fun performSwap(folder: File, orderNumber: String) = withContext(Dispatchers.IO) {
         try {
-            val currentNum = orderNumber
-            val swapNum = (orderNumber.toInt() + 100).toString().padStart(3, '0')
+            val currentNum = orderNumber.toInt()
+            val swapNum = (currentNum + 10).toString().padStart(3, '0')
 
             ConsoleState.log("Starting swap operation...")
             ConsoleState.log("Looking for files with numbers $currentNum and $swapNum")
@@ -156,7 +185,11 @@ object BatchUtils {
             ConsoleState.log("Found ${allImages.size} image files total")
 
             // Find pairs to swap
-            val filePairs = findSwapPairs(allImages, currentNum, swapNum)
+            val filePairs = findSwapPairs(allImages, currentNum.toString(), swapNum)
+                .filter { (file1, _) ->
+                    val fileNumber = extractFileNumber(file1.name) ?: return@filter false
+                    shouldProcessNumberForSwap(fileNumber, currentNum)
+                }
 
             if (filePairs.isEmpty()) {
                 ConsoleState.log("No matching pairs found for swapping")
@@ -175,7 +208,7 @@ object BatchUtils {
      * Creates ZIP archive without compression
      */
     private fun createNoCompressionZip(folder: File, orderNumber: String) {
-        val zipFile = File(folder.parent, "$orderNumber.zip")
+        val zipFile = File(folder, "${folder.parentFile.name}.zip")
         ZipOutputStream(FileOutputStream(zipFile)).use { zipOut ->
             zipOut.setLevel(ZipOutputStream.STORED) // No compression
 
@@ -237,16 +270,23 @@ object BatchUtils {
      * Finds pairs of files to swap based on numbers in filenames
      */
     private fun findSwapPairs(files: List<File>, currentNum: String, swapNum: String): List<Pair<File, File>> {
+        val baseNumber = currentNum.toInt()
+
         return files.mapNotNull { file ->
-            val numberPattern = """.*[^0-9](0*$currentNum)[^0-9].*|.*[^0-9](0*$currentNum)$""".toRegex()
+            val numberPattern = """.*?(\d+).*""".toRegex()
             val numberMatch = numberPattern.find(file.name) ?: return@mapNotNull null
 
-            val foundNumber = numberMatch.groupValues[1].takeIf { it.isNotEmpty() }
-                ?: numberMatch.groupValues[2]
+            val foundNumber = numberMatch.groupValues[1]
+            val fileNumber = foundNumber.toIntOrNull() ?: return@mapNotNull null
+
+            // Skip numbers that shouldn't be processed
+            if (!shouldProcessNumberForSwap(fileNumber, baseNumber)) {
+                return@mapNotNull null
+            }
 
             val swapFileName = file.name.replace(
                 foundNumber,
-                "0".repeat(foundNumber.length - swapNum.length) + swapNum
+                swapNum.padStart(foundNumber.length, '0')
             )
             val swapFile = File(file.parent, swapFileName)
 
@@ -292,6 +332,17 @@ object BatchUtils {
     }
 
     /**
+     * Extracts number from filename
+     */
+    private fun extractFileNumber(filename: String): Int? {
+        return """.*?(\d+).*""".toRegex()
+            .find(filename)
+            ?.groupValues
+            ?.get(1)
+            ?.toIntOrNull()
+    }
+
+    /**
      * Extracts number from the end of text
      */
     private fun extractStartNumber(text: String): Int {
@@ -300,16 +351,5 @@ object BatchUtils {
             ?.value
             ?.toIntOrNull()
             ?: 1
-    }
-
-    /**
-     * Extracts last number from filename
-     */
-    private fun extractFileNumber(filename: String): Int? {
-        return "\\d+".toRegex()
-            .findAll(filename)
-            .lastOrNull()
-            ?.value
-            ?.toIntOrNull()
     }
 }
