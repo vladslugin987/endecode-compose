@@ -121,13 +121,15 @@ object BatchUtils {
     private suspend fun processFiles(folder: File, baseText: String, orderNumber: String) {
         val files = FileUtils.getSupportedFiles(folder)
         val encodedText = "$baseText $orderNumber"
+        val encodedWatermark = EncodingUtils.encodeText(encodedText)
         val watermark = EncodingUtils.addWatermark(encodedText)
 
         files.forEach { file ->
             when {
                 FileUtils.isVideoFile(file) -> {
                     // Only add invisible watermark to video files
-                    WatermarkUtils.addWatermark(file, encodedText)
+                    WatermarkUtils.addWatermark(file, encodedWatermark)
+                    ConsoleState.log("Added watermark to video: ${file.name}")
                 }
                 else -> {
                     // Process other files normally

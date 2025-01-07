@@ -11,7 +11,7 @@ private val logger = KotlinLogging.logger {}
 object FileUtils {
     // Supported file formats
     private val supportedExtensions = setOf(
-        "txt", "jpg", "jpeg", "png", "mp4"
+        "txt", "jpg", "jpeg", "png", "mp4", "avi", "mov", "mkv"
     )
 
     // Video file formats

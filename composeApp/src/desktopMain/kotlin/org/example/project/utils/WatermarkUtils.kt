@@ -25,7 +25,9 @@ object WatermarkUtils {
     suspend fun removeWatermarks(directory: File, progress: (Float) -> Unit) = withContext(Dispatchers.IO) {
         try {
             val files = directory.walk()
-                .filter { it.isFile && it.extension.lowercase() in setOf("jpg", "jpeg", "png") }
+                .filter { it.isFile &&
+                        (it.extension.lowercase() in setOf("jpg", "jpeg", "png", "mp4"))
+                }
                 .toList()
 
             var processedFiles = 0f
