@@ -140,14 +140,6 @@ object BatchUtils {
     }
 
     /**
-     * Determines if number should be used for swapping based on base folder number
-     */
-//    private fun shouldProcessNumberForSwap(fileNumber: Int, baseNumber: Int): Boolean {
-//        val baseSeries = (baseNumber / 100) * 100
-//        return fileNumber in (baseSeries + 1)..(baseSeries + 99)
-//    }
-
-    /**
      * Adds visible watermark to photo with specified number
      */
     private suspend fun addVisibleWatermarkToPhoto(
@@ -306,71 +298,6 @@ object BatchUtils {
             zipOut.closeEntry()
         }
     }
-
-    /**
-     * Finds pairs of files to swap based on numbers in filenames
-     */
-//    private fun findSwapPairs(files: List<File>, currentNum: String, swapNum: String): List<Pair<File, File>> {
-//        val baseNumber = currentNum.toInt()
-//
-//        return files.mapNotNull { file ->
-//            val numberPattern = """.*?(\d+).*""".toRegex()
-//            val numberMatch = numberPattern.find(file.name) ?: return@mapNotNull null
-//
-//            val foundNumber = numberMatch.groupValues[1]
-//            val fileNumber = foundNumber.toIntOrNull() ?: return@mapNotNull null
-//
-//            // Skip numbers that shouldn't be processed
-//            if (!shouldProcessNumberForSwap(fileNumber, baseNumber)) {
-//                return@mapNotNull null
-//            }
-//
-//            val swapFileName = file.name.replace(
-//                foundNumber,
-//                swapNum.padStart(foundNumber.length, '0')
-//            )
-//            val swapFile = File(file.parent, swapFileName)
-//
-//            if (swapFile.exists()) {
-//                ConsoleState.log("Found pair for swapping:")
-//                ConsoleState.log("  - ${file.name}")
-//                ConsoleState.log("  - ${swapFile.name}")
-//                Pair(file, swapFile)
-//            } else {
-//                ConsoleState.log("No matching swap file found for: ${file.name}")
-//                null
-//            }
-//        }
-//    }
-
-    /**
-     * Performs actual swap of file pairs
-     */
-//    private fun swapFilePairs(pairs: List<Pair<File, File>>) {
-//        pairs.forEach { (file1, file2) ->
-//            try {
-//                ConsoleState.log("Swapping files:")
-//                ConsoleState.log("  - ${file1.name}")
-//                ConsoleState.log("  - ${file2.name}")
-//
-//                val tempFile = File(
-//                    file1.parent,
-//                    "temp_${System.currentTimeMillis()}_${file1.name}"
-//                )
-//
-//                if (file1.renameTo(tempFile) &&
-//                    file2.renameTo(file1) &&
-//                    tempFile.renameTo(file2)
-//                ) {
-//                    ConsoleState.log("Successfully swapped files")
-//                } else {
-//                    ConsoleState.log("Failed to swap files")
-//                }
-//            } catch (e: Exception) {
-//                ConsoleState.log("Error swapping files: ${e.message}")
-//            }
-//        }
-//    }
 
     /**
      * Extracts number from filename
