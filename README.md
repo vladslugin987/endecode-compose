@@ -1,5 +1,7 @@
 # ENDEcode Compose 🔐
 
+## Important! The project is moving to a paid model 🚀
+
 <div align="center">
 
 A modern file encryption and watermarking tool built with Compose Multiplatform
