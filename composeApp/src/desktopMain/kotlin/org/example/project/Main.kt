@@ -1,6 +1,7 @@
 package org.example.project
 
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -8,7 +9,8 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import org.example.project.ui.components.showInfo
 import org.example.project.ui.screens.HomeScreen
-import org.example.project.ui.theme.AppTheme
+import org.example.project.ui.theme.ENDEcodeTheme
+import org.example.project.viewmodels.ThemeViewModel
 import java.awt.Toolkit
 
 fun main() {
@@ -31,8 +33,12 @@ fun main() {
                 showInfo()
             }
 
-            AppTheme {
-                HomeScreen(window)
+            val themeViewModel = remember { ThemeViewModel() }
+            
+            ENDEcodeTheme(
+                darkTheme = themeViewModel.isDarkTheme
+            ) {
+                HomeScreen(window, themeViewModel)
             }
         }
     }

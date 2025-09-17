@@ -8,14 +8,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.unit.dp
-import org.example.project.ui.components.ConsoleView
-import org.example.project.ui.components.FileSelector
+import org.example.project.ui.components.*
 import org.example.project.ui.dialogs.*
 import org.example.project.ui.theme.Dimensions
 import org.example.project.viewmodels.HomeViewModel
+import org.example.project.viewmodels.ThemeViewModel
 
 @Composable
-fun HomeScreen(window: ComposeWindow) {
+fun HomeScreen(window: ComposeWindow, themeViewModel: ThemeViewModel) {
     val viewModel = remember { HomeViewModel() }
 
     var showBatchCopyDialog by remember { mutableStateOf(false) }
@@ -27,12 +27,19 @@ fun HomeScreen(window: ComposeWindow) {
         label = "Progress"
     )
 
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(Dimensions.spacingMedium),
-        horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingMedium)
+        verticalArrangement = Arrangement.spacedBy(Dimensions.spacingMedium)
     ) {
+        // Top bar with app title and theme controls
+        TopBar(themeViewModel)
+        
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingMedium)
+        ) {
         // Left Panel - Controls
         Column(
             modifier = Modifier
@@ -161,12 +168,13 @@ fun HomeScreen(window: ComposeWindow) {
             }
         }
 
-        // Right Panel - Console
-        ConsoleView(
-            modifier = Modifier
-                .weight(0.6f)
-                .fillMaxHeight()
-        )
+            // Right Panel - Console
+            ConsoleView(
+                modifier = Modifier
+                    .weight(0.6f)
+                    .fillMaxHeight()
+            )
+        }
     }
 
     // Dialogs
@@ -206,5 +214,50 @@ fun HomeScreen(window: ComposeWindow) {
                 viewModel.removeWatermarks()
             }
         )
+    }
+}
+
+@Composable
+private fun TopBar(
+    themeViewModel: ThemeViewModel,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Dimensions.cardPadding),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingMedium)
+            ) {
+                Text(
+                    text = "ENDEcode",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = "v2.1.1",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall)
+            ) {
+                CompactProfileButton()
+                QuickThemeToggle(themeViewModel)
+            }
+        }
     }
 }
