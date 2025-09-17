@@ -58,20 +58,11 @@ private val LightColorScheme = lightColorScheme(
     onSurfaceVariant = Neutral700,
     
     outline = Neutral300,
-    outlineVariant = Neutral200,
     scrim = androidx.compose.ui.graphics.Color.Black,
     
     inverseSurface = Neutral800,
     inverseOnSurface = Neutral100,
-    inversePrimary = Primary300,
-    
-    surfaceDim = Neutral200,
-    surfaceBright = androidx.compose.ui.graphics.Color.White,
-    surfaceContainerLowest = androidx.compose.ui.graphics.Color.White,
-    surfaceContainerLow = Neutral50,
-    surfaceContainer = Neutral100,
-    surfaceContainerHigh = Neutral200,
-    surfaceContainerHighest = Neutral300
+    inversePrimary = Primary300
 )
 
 // Dark theme color scheme
@@ -104,20 +95,11 @@ private val DarkColorScheme = darkColorScheme(
     onSurfaceVariant = Neutral400,
     
     outline = DarkOutline,
-    outlineVariant = Neutral700,
     scrim = androidx.compose.ui.graphics.Color.Black,
     
     inverseSurface = Neutral100,
     inverseOnSurface = Neutral800,
-    inversePrimary = Primary600,
-    
-    surfaceDim = androidx.compose.ui.graphics.Color(0xFF0F0F0F),
-    surfaceBright = androidx.compose.ui.graphics.Color(0xFF2B2B2B),
-    surfaceContainerLowest = androidx.compose.ui.graphics.Color(0xFF0A0A0A),
-    surfaceContainerLow = DarkSurface,
-    surfaceContainer = androidx.compose.ui.graphics.Color(0xFF1A1A1A),
-    surfaceContainerHigh = androidx.compose.ui.graphics.Color(0xFF252525),
-    surfaceContainerHighest = androidx.compose.ui.graphics.Color(0xFF303030)
+    inversePrimary = Primary600
 )
 
 // Custom colors for light theme

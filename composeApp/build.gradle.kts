@@ -19,6 +19,7 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.preview)
             implementation(compose.material3)
+            implementation(compose.materialIconsExtended)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation("org.jetbrains.compose.ui:ui-util:1.5.11")
