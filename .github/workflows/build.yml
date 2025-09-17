@@ -1,4 +1,4 @@
-name: Build Desktop Apps
+﻿name: Build Desktop Apps
 
 on:
   push:
@@ -13,28 +13,17 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
-          architecture: 'x64'
-
-      - name: Prepare resources
-        run: |
-          mkdir -p composeApp/src/commonMain/resources/icons
-          cp .github/resources/icon.ico composeApp/src/commonMain/resources/icons/ || true
-          cp .github/resources/icon.icns composeApp/src/commonMain/resources/icons/ || true
 
       - name: Grant execute permission for gradlew
         if: runner.os != 'Windows'
         run: chmod +x gradlew
-
-      - name: Install Rosetta
-        if: runner.os == 'macOS'
-        run: softwareupdate --install-rosetta --agree-to-license
 
       - name: Build macOS DMG
         if: runner.os == 'macOS'
@@ -46,26 +35,29 @@ jobs:
 
       - name: Upload macOS Artifact
         if: runner.os == 'macOS' && success()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ENDEcode-macos
-          path: composeApp/build/compose/binaries/main/dmg/ENDEcode-*.dmg
+          path: composeApp/build/compose/binaries/main/dmg/*.dmg
           if-no-files-found: error
+          compression-level: 0
 
       - name: Upload Windows Artifact
         if: runner.os == 'Windows' && success()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ENDEcode-windows
-          path: composeApp/build/compose/binaries/main/msi/ENDEcode-*.msi
+          path: composeApp/build/compose/binaries/main/msi/*.msi
           if-no-files-found: error
+          compression-level: 0
 
       - name: Upload Build Logs
         if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-logs-${{ matrix.os }}
           path: |
             composeApp/build/reports/
             composeApp/build/logs/
             **/hs_err_pid*.log
+          if-no-files-found: ignore
