@@ -24,7 +24,7 @@ internal fun MainControlPanel(
     onDeleteWatermarks: () -> Unit,
     progressValue: Float
 ) {
-    ElevatedCard(
+    Card(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(

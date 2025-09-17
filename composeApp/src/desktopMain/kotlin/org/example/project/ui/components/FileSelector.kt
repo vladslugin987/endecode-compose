@@ -22,6 +22,7 @@ import javax.swing.JFileChooser
 import javax.swing.JWindow
 import javax.swing.SwingUtilities
 import org.example.project.utils.ConsoleState
+import org.example.project.ui.theme.Dimensions
 import java.awt.dnd.*
 import java.awt.Point
 import javax.swing.JPanel
@@ -59,6 +60,16 @@ fun FileSelector(
             override fun dragEnter(dtde: DropTargetDragEvent) {
                 // ConsoleState.log("Drag entered")
                 isDragging = true
+                dtde.acceptDrag(DnDConstants.ACTION_COPY)
+            }
+
+            override fun dragOver(dtde: DropTargetDragEvent) {
+                // On Windows, accept must be called continuously during dragOver
+                isDragging = true
+                dtde.acceptDrag(DnDConstants.ACTION_COPY)
+            }
+
+            override fun dropActionChanged(dtde: DropTargetDragEvent) {
                 dtde.acceptDrag(DnDConstants.ACTION_COPY)
             }
 
@@ -170,12 +181,12 @@ fun FileSelector(
             Text(selectedPath ?: "Choose folder with files")
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Dimensions.spacingMedium))
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(150.dp)
+                .height(Dimensions.dropZoneHeight)
                 .border(
                     width = if (isDragging) 3.dp else 2.dp,
                     color = if (isDragging)

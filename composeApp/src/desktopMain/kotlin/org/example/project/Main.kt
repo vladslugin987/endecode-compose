@@ -38,7 +38,12 @@ fun main() {
             ENDEcodeTheme(
                 darkTheme = themeViewModel.isDarkTheme
             ) {
-                HomeScreen(window, themeViewModel)
+                androidx.compose.material3.Surface(
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.background,
+                    modifier = androidx.compose.ui.Modifier.fillMaxSize()
+                ) {
+                    HomeScreen(window, themeViewModel)
+                }
             }
         }
     }

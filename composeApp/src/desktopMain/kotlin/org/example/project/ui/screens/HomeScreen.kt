@@ -47,8 +47,8 @@ fun HomeScreen(window: ComposeWindow, themeViewModel: ThemeViewModel) {
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.spacedBy(Dimensions.spacingMedium)
         ) {
-            // Main Control Panel
-            ElevatedCard(
+            // Main Control Panel (lighter look)
+            Card(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(

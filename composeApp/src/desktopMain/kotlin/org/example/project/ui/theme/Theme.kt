@@ -1,9 +1,11 @@
 package org.example.project.ui.theme
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -262,6 +264,15 @@ val LocalCustomColors = staticCompositionLocalOf { LightCustomColors }
 val MaterialTheme.customColors: CustomColors
     @Composable get() = LocalCustomColors.current
 
+// Sharper, modern shapes
+private val AppShapes = Shapes(
+    extraSmall = RoundedCornerShape(4.dp),
+    small = RoundedCornerShape(Dimensions.radiusSmall),
+    medium = RoundedCornerShape(Dimensions.radiusMedium),
+    large = RoundedCornerShape(Dimensions.radiusLarge),
+    extraLarge = RoundedCornerShape(16.dp)
+)
+
 @Composable
 fun ENDEcodeTheme(
     darkTheme: Boolean = false,
@@ -274,6 +285,7 @@ fun ENDEcodeTheme(
         MaterialTheme(
             colorScheme = colorScheme,
             typography = AppTypography,
+            shapes = AppShapes,
             content = content
         )
     }

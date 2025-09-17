@@ -31,7 +31,7 @@ fun ConsoleView(
         }
     }
 
-    ElevatedCard(
+    Card(
         modifier = modifier
     ) {
         Column(

@@ -4,23 +4,23 @@ import androidx.compose.ui.unit.dp
 
 object Dimensions {
     // Button sizes
-    val buttonHeight = 40.dp
-    val buttonPadding = 12.dp
-    val iconButtonSize = 40.dp
-    val smallButtonHeight = 32.dp
+    val buttonHeight = 36.dp
+    val buttonPadding = 10.dp
+    val iconButtonSize = 36.dp
+    val smallButtonHeight = 28.dp
 
     // Spacing
     val spacingXSmall = 2.dp
-    val spacingSmall = 8.dp
-    val spacingMedium = 16.dp
-    val spacingLarge = 24.dp
-    val spacingXLarge = 32.dp
+    val spacingSmall = 6.dp
+    val spacingMedium = 12.dp
+    val spacingLarge = 18.dp
+    val spacingXLarge = 28.dp
 
     // Component sizes
     val dropZoneHeight = 120.dp
-    val consoleHeight = 300.dp
-    val cardPadding = 16.dp
-    val dialogPadding = 24.dp
+    val consoleHeight = 280.dp
+    val cardPadding = 12.dp
+    val dialogPadding = 20.dp
     
     // Icon sizes
     val iconSmall = 16.dp
@@ -28,9 +28,9 @@ object Dimensions {
     val iconLarge = 32.dp
     
     // Border radius
-    val radiusSmall = 8.dp
-    val radiusMedium = 12.dp
-    val radiusLarge = 16.dp
+    val radiusSmall = 6.dp
+    val radiusMedium = 10.dp
+    val radiusLarge = 12.dp
     
     // Elevation
     val elevationSmall = 2.dp
