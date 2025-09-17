@@ -42,10 +42,9 @@ kotlin {
     }
 }
 
-// Define icon paths
-val iconsDir = project.file("src/commonMain/resources/icons")
-val macIcon = iconsDir.resolve("icon.icns")
-val winIcon = iconsDir.resolve("icon.ico")
+// Define icon paths (use module root where icons are placed)
+val macIcon = project.file("icon.icns")
+val winIcon = project.file("icon.ico")
 
 compose.desktop {
     application {

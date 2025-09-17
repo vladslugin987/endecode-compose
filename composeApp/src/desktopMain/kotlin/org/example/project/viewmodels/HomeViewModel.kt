@@ -70,7 +70,7 @@ class HomeViewModel {
                             ConsoleState.log("Error processing ${file.name}: ${e.message}")
                         }
                     }
-                    withContext(Dispatchers.Main) {
+                    withContext(Dispatchers.Swing) {
                         progress = (index + 1).toFloat() / files.size
                     }
                 }

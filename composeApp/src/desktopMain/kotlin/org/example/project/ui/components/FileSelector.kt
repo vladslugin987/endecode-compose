@@ -15,6 +15,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import java.awt.datatransfer.DataFlavor
 import java.io.File
+import java.io.Reader
+import java.net.URI
+import java.nio.file.Paths
 import javax.swing.JFileChooser
 import javax.swing.JWindow
 import javax.swing.SwingUtilities
@@ -66,6 +69,7 @@ fun FileSelector(
 
             override fun drop(dtde: DropTargetDropEvent) {
                 // ConsoleState.log("Drop occurred")
+                var handled = false
                 try {
                     dtde.acceptDrop(DnDConstants.ACTION_COPY)
                     val transferable = dtde.transferable
@@ -79,13 +83,40 @@ fun FileSelector(
                             SwingUtilities.invokeLater {
                                 onPathSelected(file.absolutePath)
                             }
-                            dtde.dropComplete(true)
+                            handled = true
+                        }
+                    }
+
+                    if (!handled) {
+                        // Fallback for macOS: handle text/uri-list flavor
+                        for (flavor in transferable.transferDataFlavors) {
+                            if (flavor.mimeType.contains("text/uri-list")) {
+                                val reader = transferable.getTransferData(flavor) as? Reader
+                                val uris = reader?.buffered()?.use { it.readLines() } ?: emptyList()
+                                for (uriString in uris) {
+                                    try {
+                                        val uri = URI(uriString.trim())
+                                        val f = Paths.get(uri).toFile()
+                                        if (f.isDirectory) {
+                                            ConsoleState.log("Directory dropped (uri-list): ${f.absolutePath}")
+                                            SwingUtilities.invokeLater {
+                                                onPathSelected(f.absolutePath)
+                                            }
+                                            handled = true
+                                            break
+                                        }
+                                    } catch (_: Exception) {
+                                        // ignore malformed URIs
+                                    }
+                                }
+                                if (handled) break
+                            }
                         }
                     }
                 } catch (e: Exception) {
                     ConsoleState.log("Drop error: ${e.message}")
-                    dtde.dropComplete(false)
                 } finally {
+                    dtde.dropComplete(handled)
                     isDragging = false
                 }
             }

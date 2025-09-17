@@ -3,7 +3,7 @@ package org.example.project.utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
-import org.apache.commons.io.FileUtils
+import org.apache.commons.io.FileUtils as ApacheFileUtils
 import java.io.File
 
 private val logger = KotlinLogging.logger {}
@@ -24,7 +24,7 @@ object FileUtils {
      */
     suspend fun copyDirectory(source: File, destination: File) = withContext(Dispatchers.IO) {
         try {
-            FileUtils.copyDirectory(source, destination)
+            ApacheFileUtils.copyDirectory(source, destination)
             ConsoleState.log("Directory copied: ${destination.name}")
             true
         } catch (e: Exception) {

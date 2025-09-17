@@ -33,6 +33,12 @@ object WatermarkUtils {
             var processedFiles = 0f
             val totalFiles = files.size
 
+            if (totalFiles == 0) {
+                ConsoleState.log("No supported files found for watermark removal in ${directory.name}")
+                progress(1f)
+                return@withContext true
+            }
+
             files.forEach { file ->
                 try {
                     if (removeWatermarkFromFile(file)) {
@@ -133,7 +139,7 @@ object WatermarkUtils {
         RandomAccessFile(file, "r").use { randomAccessFile ->
             try {
                 val fileSize = randomAccessFile.length()
-                if (fileSize < MAX_WATERMARK_LENGTH) return@use null
+                if (fileSize <= 0) return@use null
 
                 val readLength = MAX_WATERMARK_LENGTH.coerceAtMost(fileSize.toInt())
                 randomAccessFile.seek(fileSize - readLength)
