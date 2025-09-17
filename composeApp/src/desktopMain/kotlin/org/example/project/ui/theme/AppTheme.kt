@@ -1,4 +1,3 @@
-@file:Deprecated("Use Theme.kt instead", ReplaceWith("ENDEcodeTheme", "org.example.project.ui.theme.ENDEcodeTheme"))
 package org.example.project.ui.theme
 
 import androidx.compose.runtime.Composable
