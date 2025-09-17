@@ -31,7 +31,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          ./gradlew :composeApp:compileKotlinDesktop --warning-mode all --stacktrace --console=plain --no-daemon | tee compile-macos.log
+          ./gradlew :composeApp:compileKotlinDesktop --warning-mode all --stacktrace --console=plain --no-daemon 2>&1 | tee compile-macos.log
 
       - name: Compile Kotlin (Windows)
         if: runner.os == 'Windows'
