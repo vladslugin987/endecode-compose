@@ -2,7 +2,14 @@ package org.example.project.ui.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Computer
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Login
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,7 +33,7 @@ fun ThemeToggle(
                 imageVector = when (themeViewModel.themeMode) {
                     ThemeMode.LIGHT -> Icons.Default.LightMode
                     ThemeMode.DARK -> Icons.Default.DarkMode
-                    ThemeMode.SYSTEM -> Icons.Default.Settings
+                    ThemeMode.SYSTEM -> Icons.Default.Computer
                 },
                 contentDescription = "Theme settings",
                 tint = MaterialTheme.colorScheme.onSurface

@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.swing.Swing
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import org.example.project.data.PreferencesManager
@@ -14,7 +15,7 @@ import java.awt.Toolkit
 private val logger = KotlinLogging.logger {}
 
 class ThemeViewModel {
-    private val scope = CoroutineScope(Dispatchers.Main)
+    private val scope = CoroutineScope(Dispatchers.Swing)
     
     // Current theme mode from preferences
     var themeMode by mutableStateOf(PreferencesManager.themeMode)
@@ -129,7 +130,5 @@ class ThemeViewModel {
     /**
      * Get all available theme modes
      */
-    fun getAvailableThemeModes(): List<ThemeMode> {
-        return ThemeMode.entries
-    }
+    fun getAvailableThemeModes(): List<ThemeMode> = ThemeMode.values().toList()
 }
