@@ -25,6 +25,45 @@ jobs:
         if: runner.os != 'Windows'
         run: chmod +x gradlew
 
+      # Compile first to capture Kotlin errors with plain logs
+      - name: Compile Kotlin (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -o pipefail
+          ./gradlew :composeApp:compileKotlinDesktop --warning-mode all --stacktrace --console=plain --no-daemon | tee compile-macos.log
+
+      - name: Compile Kotlin (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          .\gradlew.bat :composeApp:compileKotlinDesktop --warning-mode all --stacktrace --console=plain --no-daemon *>&1 | Tee-Object -FilePath compile-windows.log
+
+      # If compilation failed, show last lines and upload logs
+      - name: Show Kotlin error tail (macOS)
+        if: failure() && runner.os == 'macOS'
+        shell: bash
+        run: |
+          echo "==== Last 200 lines of Kotlin compile log ===="
+          tail -n 200 compile-macos.log || true
+
+      - name: Show Kotlin error tail (Windows)
+        if: failure() && runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Write-Host "==== Last 200 lines of Kotlin compile log ===="
+          Get-Content compile-windows.log -Tail 200 -ErrorAction SilentlyContinue
+
+      - name: Upload compile logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compile-logs-${{ matrix.os }}
+          path: |
+            compile-*.log
+            **/kotlin-daemon.*.log
+          if-no-files-found: ignore
+
       - name: Build macOS DMG
         if: runner.os == 'macOS'
         run: ./gradlew packageDmg --stacktrace --info --no-daemon
