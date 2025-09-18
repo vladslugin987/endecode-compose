@@ -461,23 +461,21 @@ The Provider.forUseAtConfigurationTime method has been deprecated. This is sched
 
 > Task :composeApp:checkKotlinGradlePluginConfigurationErrors
 
+> Task :composeApp:compileKotlinDesktop
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/ConsoleView.kt:61:61 Unresolved reference: luminance
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/ConsoleView.kt:61:79 Unresolved reference: it
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/ConsoleView.kt:190:57 Unresolved reference: luminance
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/ConsoleView.kt:190:75 Unresolved reference: it
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/ConsoleView.kt:241:53 Unresolved reference: luminance
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/ConsoleView.kt:241:71 Unresolved reference: it
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/GlassmorphismComponents.kt:31:53 Unresolved reference: luminance
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/GlassmorphismComponents.kt:31:71 Unresolved reference: it
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/GlassmorphismComponents.kt:130:53 Unresolved reference: luminance
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/GlassmorphismComponents.kt:130:71 Unresolved reference: it
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/GlassmorphismComponents.kt:168:53 Unresolved reference: luminance
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/GlassmorphismComponents.kt:168:71 Unresolved reference: it
+
 > Task :composeApp:compileKotlinDesktop FAILED
-e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:215:28 Unresolved reference: TerminalSuccess
-e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:225:25 Unresolved reference: TerminalText
-e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:263:39 Unresolved reference: Primary400
-e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:263:55 Unresolved reference: GlassCardBorder
-e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:269:23 Type mismatch: inferred type is Unit but Color was expected
-e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:269:39 Unresolved reference: Primary500
-e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:269:74 Function invocation 'GlassCard(...)' expected
-e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:269:74 No value passed for parameter 'content'
-e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:313:40 Unresolved reference: Primary400
-e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:313:56 Unresolved reference: TerminalText
-e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:316:13 None of the following functions can be called with the arguments supplied: 
-public fun Text(text: AnnotatedString, modifier: Modifier = ..., color: Color = ..., fontSize: TextUnit = ..., fontStyle: FontStyle? = ..., fontWeight: FontWeight? = ..., fontFamily: FontFamily? = ..., letterSpacing: TextUnit = ..., textDecoration: TextDecoration? = ..., textAlign: TextAlign? = ..., lineHeight: TextUnit = ..., overflow: TextOverflow = ..., softWrap: Boolean = ..., maxLines: Int = ..., minLines: Int = ..., inlineContent: Map<String, InlineTextContent> = ..., onTextLayout: (TextLayoutResult) -> Unit = ..., style: TextStyle = ...): Unit defined in androidx.compose.material3
-public fun Text(text: String, modifier: Modifier = ..., color: Color = ..., fontSize: TextUnit = ..., fontStyle: FontStyle? = ..., fontWeight: FontWeight? = ..., fontFamily: FontFamily? = ..., letterSpacing: TextUnit = ..., textDecoration: TextDecoration? = ..., textAlign: TextAlign? = ..., lineHeight: TextUnit = ..., overflow: TextOverflow = ..., softWrap: Boolean = ..., maxLines: Int = ..., minLines: Int = ..., onTextLayout: (TextLayoutResult) -> Unit = ..., style: TextStyle = ...): Unit defined in androidx.compose.material3
-e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:321:41 Unresolved reference: Primary400
-e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:321:57 Unresolved reference: DarkOnSurface
-e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:328:29 Unresolved reference: TerminalText
 
 FAILURE: Build failed with an exception.
 
@@ -522,6 +520,35 @@ org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':compose
 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:303)
 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
+	at org.gradle.execution.plan.DefaultPlanExecutor.process(DefaultPlanExecutor.java:111)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.executeWithServices(DefaultTaskExecutionGraph.java:138)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.execute(DefaultTaskExecutionGraph.java:123)
+	at org.gradle.execution.SelectedTaskExecutionAction.execute(SelectedTaskExecutionAction.java:35)
+	at org.gradle.execution.DryRunBuildExecutionAction.execute(DryRunBuildExecutionAction.java:51)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:54)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:43)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:209)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor.execute(BuildOperationFiringBuildWorkerExecutor.java:40)
+	at org.gradle.internal.build.DefaultBuildLifecycleController.lambda$executeTasks$10(DefaultBuildLifecycleController.java:313)
+	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
+	at org.gradle.internal.model.StateTransitionController.lambda$tryTransition$8(StateTransitionController.java:177)
+	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:44)
+	at org.gradle.internal.model.StateTransitionController.tryTransition(StateTransitionController.java:177)
+	at org.gradle.internal.build.DefaultBuildLifecycleController.executeTasks(DefaultBuildLifecycleController.java:304)
+	at org.gradle.internal.build.DefaultBuildWorkGraphController$DefaultBuildWorkGraph.runWork(DefaultBuildWorkGraphController.java:220)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:267)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:131)
+	at org.gradle.composite.internal.DefaultBuildController.doRun(DefaultBuildController.java:181)
+	at org.gradle.composite.internal.DefaultBuildController.access$000(DefaultBuildController.java:50)
+	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.lambda$run$0(DefaultBuildController.java:198)
+	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:85)
+	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.run(DefaultBuildController.java:198)
 	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
 	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
 Caused by: org.gradle.workers.internal.DefaultWorkerExecutor$WorkExecutionException: A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
@@ -646,6 +673,35 @@ Caused by: org.gradle.workers.internal.DefaultWorkerExecutor$WorkExecutionExcept
 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:303)
 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
+	at org.gradle.execution.plan.DefaultPlanExecutor.process(DefaultPlanExecutor.java:111)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.executeWithServices(DefaultTaskExecutionGraph.java:138)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.execute(DefaultTaskExecutionGraph.java:123)
+	at org.gradle.execution.SelectedTaskExecutionAction.execute(SelectedTaskExecutionAction.java:35)
+	at org.gradle.execution.DryRunBuildExecutionAction.execute(DryRunBuildExecutionAction.java:51)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:54)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:43)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:209)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor.execute(BuildOperationFiringBuildWorkerExecutor.java:40)
+	at org.gradle.internal.build.DefaultBuildLifecycleController.lambda$executeTasks$10(DefaultBuildLifecycleController.java:313)
+	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
+	at org.gradle.internal.model.StateTransitionController.lambda$tryTransition$8(StateTransitionController.java:177)
+	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:44)
+	at org.gradle.internal.model.StateTransitionController.tryTransition(StateTransitionController.java:177)
+	at org.gradle.internal.build.DefaultBuildLifecycleController.executeTasks(DefaultBuildLifecycleController.java:304)
+	at org.gradle.internal.build.DefaultBuildWorkGraphController$DefaultBuildWorkGraph.runWork(DefaultBuildWorkGraphController.java:220)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:267)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:131)
+	at org.gradle.composite.internal.DefaultBuildController.doRun(DefaultBuildController.java:181)
+	at org.gradle.composite.internal.DefaultBuildController.access$000(DefaultBuildController.java:50)
+	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.lambda$run$0(DefaultBuildController.java:198)
+	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:85)
+	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.run(DefaultBuildController.java:198)
 	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
 	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
 Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilation error. See log for more details
@@ -681,5 +737,5 @@ Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilat
 	... 2 more
 
 
-BUILD FAILED in 1m 10s
+BUILD FAILED in 1m 2s
 2 actionable tasks: 2 executed
