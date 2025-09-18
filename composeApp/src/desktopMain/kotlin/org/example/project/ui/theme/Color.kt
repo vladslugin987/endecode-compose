@@ -52,21 +52,21 @@ val Neutral700 = Color(0xFF374151)
 val Neutral800 = Color(0xFF1F2937)
 val Neutral900 = Color(0xFF111827)
 
-// Dark theme glassmorphism colors - Better visibility
-val DarkGlassSurface = Color(0xFF1E1F2E)
-val DarkGlassSurfaceVariant = Color(0xFF2D2E3F) 
-val DarkGlassBackground = Color(0xFF141526)
-val DarkGlassCard = Color(0xCC1E1F2E) // More opaque card
-val DarkGlassCardBorder = Color(0x60FFFFFF) // More visible border
-val DarkGlassHighlight = Color(0x30FFFFFF) // Glass highlight effect
+// Dark theme glassmorphism colors - Enhanced visibility and beauty
+val DarkGlassSurface = Color(0xFF1A1B2E)
+val DarkGlassSurfaceVariant = Color(0xFF252640) 
+val DarkGlassBackground = Color(0xFF0F1419)
+val DarkGlassCard = Color(0xDD1A1B2E) // More prominent card
+val DarkGlassCardBorder = Color(0x80FFFFFF) // Brighter border
+val DarkGlassHighlight = Color(0x40FFFFFF) // Enhanced glass highlight effect
 
-// Light theme glassmorphism colors - Better contrast
-val LightGlassSurface = Color(0xFFF8F9FA)
-val LightGlassSurfaceVariant = Color(0xFFE9ECEF)
-val LightGlassBackground = Color(0xFFFDFDFD)
-val LightGlassCard = Color(0xCCF8F9FA) // More visible card
-val LightGlassCardBorder = Color(0x80DEE2E6) // More visible border
-val LightGlassHighlight = Color(0x40FFFFFF) // Glass highlight effect
+// Light theme glassmorphism colors - Enhanced contrast and elegance
+val LightGlassSurface = Color(0xFFF5F7FA)
+val LightGlassSurfaceVariant = Color(0xFFE2E8F0)
+val LightGlassBackground = Color(0xFFFAFBFC)
+val LightGlassCard = Color(0xEAF5F7FA) // More prominent card
+val LightGlassCardBorder = Color(0x90CBD5E0) // More defined border
+val LightGlassHighlight = Color(0x50FFFFFF) // Enhanced glass highlight effect
 
 // Backwards compatibility
 val GlassSurface = DarkGlassSurface

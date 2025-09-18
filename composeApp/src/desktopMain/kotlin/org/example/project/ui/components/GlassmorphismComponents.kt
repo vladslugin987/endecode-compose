@@ -48,27 +48,46 @@ fun GlassCard(
             )
             .clip(RoundedCornerShape(borderRadius))
             .background(
-                brush = Brush.verticalGradient(
-                    colors = if (isDark) {
-                        listOf(
+                brush = if (isDark) {
+                    Brush.linearGradient(
+                        colors = listOf(
+                            actualBackgroundColor.copy(alpha = 0.4f),
                             actualBackgroundColor.copy(alpha = 0.25f),
-                            actualBackgroundColor.copy(alpha = 0.15f)
-                        )
-                    } else {
-                        listOf(
-                            actualBackgroundColor.copy(alpha = 0.85f),
-                            actualBackgroundColor.copy(alpha = 0.65f)
-                        )
-                    }
-                )
+                            actualBackgroundColor.copy(alpha = 0.35f)
+                        ),
+                        start = Offset(0f, 0f),
+                        end = Offset(1000f, 1000f)
+                    )
+                } else {
+                    Brush.linearGradient(
+                        colors = listOf(
+                            actualBackgroundColor.copy(alpha = 0.9f),
+                            actualBackgroundColor.copy(alpha = 0.75f),
+                            actualBackgroundColor.copy(alpha = 0.85f)
+                        ),
+                        start = Offset(0f, 0f),
+                        end = Offset(1000f, 1000f)
+                    )
+                }
             )
             .border(
                 width = Dimensions.glassBorderWidth,
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        actualBorderColor.copy(alpha = 0.8f),
-                        actualBorderColor.copy(alpha = 0.4f)
-                    )
+                brush = Brush.linearGradient(
+                    colors = if (isDark) {
+                        listOf(
+                            actualBorderColor.copy(alpha = 0.9f),
+                            actualBorderColor.copy(alpha = 0.6f),
+                            actualBorderColor.copy(alpha = 0.4f)
+                        )
+                    } else {
+                        listOf(
+                            actualBorderColor.copy(alpha = 0.8f),
+                            actualBorderColor.copy(alpha = 0.5f),
+                            actualBorderColor.copy(alpha = 0.3f)
+                        )
+                    },
+                    start = Offset(0f, 0f),
+                    end = Offset(500f, 500f)
                 ),
                 shape = RoundedCornerShape(borderRadius)
             ),
@@ -138,7 +157,7 @@ fun AnimatedGlassButton(
 }
 
 /**
- * Terminal-styled text field that adapts to theme
+ * Terminal-styled text field that adapts to theme with full transparency
  */
 @Composable
 fun TerminalTextField(
@@ -154,7 +173,6 @@ fun TerminalTextField(
     
     val terminalAccent = if (isDark) DarkTerminalAccent else LightTerminalAccent
     val terminalText = if (isDark) DarkTerminalText else LightTerminalText
-    val terminalBg = if (isDark) DarkTerminalBackground else LightTerminalBackground
     val onSurface = if (isDark) DarkOnSurface else LightOnSurface
     
     OutlinedTextField(
@@ -162,19 +180,25 @@ fun TerminalTextField(
         onValueChange = onValueChange,
         modifier = modifier,
         label = label?.let { { Text(it, color = terminalAccent) } },
-        supportingText = supportingText?.let { { Text(it, color = terminalText) } },
+        supportingText = supportingText?.let { { Text(it, color = terminalText.copy(alpha = 0.8f)) } },
         enabled = enabled,
         singleLine = singleLine,
         colors = OutlinedTextFieldDefaults.colors(
             focusedTextColor = onSurface,
-            unfocusedTextColor = onSurface,
+            unfocusedTextColor = onSurface.copy(alpha = 0.9f),
+            disabledTextColor = onSurface.copy(alpha = 0.6f),
             focusedBorderColor = terminalAccent,
-            unfocusedBorderColor = terminalText.copy(alpha = 0.5f),
+            unfocusedBorderColor = terminalText.copy(alpha = 0.6f),
+            disabledBorderColor = terminalText.copy(alpha = 0.3f),
             focusedLabelColor = terminalAccent,
-            unfocusedLabelColor = terminalText,
+            unfocusedLabelColor = terminalText.copy(alpha = 0.8f),
+            disabledLabelColor = terminalText.copy(alpha = 0.5f),
             cursorColor = terminalAccent,
+            // Complete transparency for containers
             focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent
+            unfocusedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+            errorContainerColor = Color.Transparent
         ),
         shape = RoundedCornerShape(Dimensions.radiusSmall)
     )
@@ -224,30 +248,34 @@ fun GradientBackground(
     )
     
     Box(modifier = modifier) {
-        // Base cosmic background
+        // Enhanced cosmic background with improved gradients
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     brush = if (isDark) {
-                        Brush.radialGradient(
+                        Brush.linearGradient(
                             colors = listOf(
-                                Color(0xFF0A0A1A),
-                                Color(0xFF1A1A2E),
-                                Color(0xFF16213E),
-                                Color(0xFF0F0F1C)
+                                Color(0xFF0B1426), // Deep space blue
+                                Color(0xFF1A1F3A), // Rich dark purple
+                                Color(0xFF2D1B69), // Deep violet
+                                Color(0xFF1A0B2E), // Dark purple
+                                Color(0xFF0F0B1F)  // Almost black
                             ),
-                            radius = 1500f
+                            start = Offset(0f, 0f),
+                            end = Offset(1000f, 1000f)
                         )
                     } else {
-                        Brush.radialGradient(
+                        Brush.linearGradient(
                             colors = listOf(
-                                Color(0xFFFFFFFF),
-                                Color(0xFFF0F4FF),
-                                Color(0xFFE6F2FF),
-                                Color(0xFFFAFBFF)
+                                Color(0xFFF8FAFF), // Pure white
+                                Color(0xFFEEF2FF), // Light blue tint
+                                Color(0xFFE0E7FF), // Soft blue
+                                Color(0xFFF0F4FF), // Very light blue
+                                Color(0xFFFBFCFF)  // Almost white
                             ),
-                            radius = 1500f
+                            start = Offset(0f, 0f),
+                            end = Offset(1000f, 1000f)
                         )
                     }
                 )
@@ -281,17 +309,18 @@ private fun AnimatedCosmicOrbs(
         val height = size.height
         
         if (isDark) {
-            // Dark theme cosmic orbs
+            // Enhanced dark theme cosmic orbs with stronger presence
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        Primary400.copy(alpha = 0.15f),
-                        Primary600.copy(alpha = 0.08f),
+                        Primary300.copy(alpha = 0.25f),
+                        Primary500.copy(alpha = 0.15f),
+                        Primary700.copy(alpha = 0.08f),
                         Color.Transparent
                     ),
-                    radius = 200f
+                    radius = 250f
                 ),
-                radius = 200f,
+                radius = 250f,
                 center = Offset(
                     width * 0.2f + cos(Math.toRadians(offset1.toDouble())).toFloat() * 100f,
                     height * 0.3f + sin(Math.toRadians(offset1.toDouble())).toFloat() * 80f
@@ -301,13 +330,14 @@ private fun AnimatedCosmicOrbs(
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        Secondary400.copy(alpha = 0.12f),
-                        Secondary600.copy(alpha = 0.06f),
+                        Secondary300.copy(alpha = 0.22f),
+                        Secondary500.copy(alpha = 0.12f),
+                        Secondary700.copy(alpha = 0.06f),
                         Color.Transparent
                     ),
-                    radius = 150f
+                    radius = 200f
                 ),
-                radius = 150f,
+                radius = 200f,
                 center = Offset(
                     width * 0.8f + cos(Math.toRadians(offset2.toDouble())).toFloat() * 120f,
                     height * 0.7f + sin(Math.toRadians(offset2.toDouble())).toFloat() * 100f
@@ -317,30 +347,32 @@ private fun AnimatedCosmicOrbs(
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        Accent400.copy(alpha = 0.1f),
-                        Accent600.copy(alpha = 0.05f),
+                        Accent300.copy(alpha = 0.18f),
+                        Accent500.copy(alpha = 0.10f),
+                        Accent700.copy(alpha = 0.05f),
                         Color.Transparent
                     ),
-                    radius = 180f
+                    radius = 220f
                 ),
-                radius = 180f,
+                radius = 220f,
                 center = Offset(
                     width * 0.5f + cos(Math.toRadians(offset3.toDouble())).toFloat() * 80f,
                     height * 0.5f + sin(Math.toRadians(offset3.toDouble())).toFloat() * 60f
                 )
             )
         } else {
-            // Light theme subtle orbs
+            // Enhanced light theme subtle orbs with better visibility
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        Primary200.copy(alpha = 0.3f),
-                        Primary100.copy(alpha = 0.15f),
+                        Primary300.copy(alpha = 0.4f),
+                        Primary200.copy(alpha = 0.25f),
+                        Primary100.copy(alpha = 0.12f),
                         Color.Transparent
                     ),
-                    radius = 250f
+                    radius = 280f
                 ),
-                radius = 250f,
+                radius = 280f,
                 center = Offset(
                     width * 0.15f + cos(Math.toRadians(offset1.toDouble())).toFloat() * 80f,
                     height * 0.25f + sin(Math.toRadians(offset1.toDouble())).toFloat() * 60f
@@ -350,13 +382,14 @@ private fun AnimatedCosmicOrbs(
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        Secondary200.copy(alpha = 0.25f),
-                        Secondary100.copy(alpha = 0.12f),
+                        Secondary300.copy(alpha = 0.35f),
+                        Secondary200.copy(alpha = 0.20f),
+                        Secondary100.copy(alpha = 0.10f),
                         Color.Transparent
                     ),
-                    radius = 200f
+                    radius = 240f
                 ),
-                radius = 200f,
+                radius = 240f,
                 center = Offset(
                     width * 0.85f + cos(Math.toRadians(offset2.toDouble())).toFloat() * 100f,
                     height * 0.75f + sin(Math.toRadians(offset2.toDouble())).toFloat() * 80f
@@ -366,13 +399,14 @@ private fun AnimatedCosmicOrbs(
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        Accent200.copy(alpha = 0.2f),
-                        Accent100.copy(alpha = 0.1f),
+                        Accent300.copy(alpha = 0.3f),
+                        Accent200.copy(alpha = 0.18f),
+                        Accent100.copy(alpha = 0.08f),
                         Color.Transparent
                     ),
-                    radius = 220f
+                    radius = 260f
                 ),
-                radius = 220f,
+                radius = 260f,
                 center = Offset(
                     width * 0.6f + cos(Math.toRadians(offset3.toDouble())).toFloat() * 70f,
                     height * 0.4f + sin(Math.toRadians(offset3.toDouble())).toFloat() * 50f

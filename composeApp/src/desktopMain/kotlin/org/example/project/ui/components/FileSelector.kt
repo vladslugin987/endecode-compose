@@ -295,11 +295,20 @@ private fun ModernDropZone(
             )
             .clip(RoundedCornerShape(Dimensions.radiusMedium))
             .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        backgroundColor,
-                        backgroundColor.copy(alpha = 0.7f)
-                    )
+                brush = Brush.linearGradient(
+                    colors = if (isDragging) {
+                        listOf(
+                            backgroundColor,
+                            backgroundColor.copy(alpha = 0.8f),
+                            backgroundColor.copy(alpha = 0.6f)
+                        )
+                    } else {
+                        listOf(
+                            backgroundColor.copy(alpha = 0.9f),
+                            backgroundColor.copy(alpha = 0.6f),
+                            backgroundColor.copy(alpha = 0.8f)
+                        )
+                    }
                 )
             )
             .border(

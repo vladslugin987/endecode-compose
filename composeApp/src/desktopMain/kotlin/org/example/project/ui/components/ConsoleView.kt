@@ -67,10 +67,11 @@ fun ConsoleView(
                     .fillMaxSize()
                     .clip(RoundedCornerShape(Dimensions.radiusSmall))
                     .background(
-                        brush = Brush.verticalGradient(
+                        brush = Brush.linearGradient(
                             colors = listOf(
-                                terminalBg,
-                                terminalBg.copy(alpha = 0.95f)
+                                terminalBg.copy(alpha = 0.95f),
+                                terminalBg.copy(alpha = 0.8f),
+                                terminalBg.copy(alpha = 0.9f)
                             )
                         )
                     )
