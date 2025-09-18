@@ -107,6 +107,8 @@ fun AnimatedGlassButton(
     content: @Composable RowScope.() -> Unit
 ) {
     var isPressed by remember { mutableStateOf(false) }
+    val isDark = !MaterialTheme.colorScheme.surface.luminance().let { it > 0.5f }
+    
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.95f else 1f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
@@ -116,13 +118,23 @@ fun AnimatedGlassButton(
     val backgroundColor = if (isPrimary) {
         if (enabled) Primary500 else Primary500.copy(alpha = 0.5f)
     } else {
-        if (enabled) GlassCard else GlassCard.copy(alpha = 0.5f)
+        if (enabled) {
+            if (isDark) DarkGlassCard else LightGlassCard
+        } else {
+            if (isDark) DarkGlassCard.copy(alpha = 0.5f) else LightGlassCard.copy(alpha = 0.5f)
+        }
     }
     
     val borderColor = if (isPrimary) {
-        Primary400.copy(alpha = 0.6f)
+        Primary400.copy(alpha = 0.8f)
     } else {
-        GlassCardBorder
+        if (isDark) DarkGlassCardBorder else LightGlassCardBorder
+    }
+    
+    val contentColor = if (isPrimary) {
+        Color.White
+    } else {
+        if (isDark) DarkOnSurface else LightOnSurface
     }
 
     Button(
@@ -130,8 +142,7 @@ fun AnimatedGlassButton(
             if (enabled) {
                 isPressed = true
                 onClick()
-                // Reset press state after a short delay - simplified approach
-                // In a real app, use LaunchedEffect in the calling composable
+                // Reset press state after a short delay
                 isPressed = false
             }
         },
@@ -140,9 +151,9 @@ fun AnimatedGlassButton(
             .height(Dimensions.buttonHeight),
         colors = ButtonDefaults.buttonColors(
             containerColor = backgroundColor,
-            contentColor = if (isPrimary) Color.White else DarkOnSurface,
+            contentColor = contentColor,
             disabledContainerColor = backgroundColor.copy(alpha = 0.3f),
-            disabledContentColor = if (isPrimary) Color.White.copy(alpha = 0.5f) else DarkOnSurface.copy(alpha = 0.5f)
+            disabledContentColor = contentColor.copy(alpha = 0.5f)
         ),
         shape = RoundedCornerShape(Dimensions.radiusSmall),
         border = androidx.compose.foundation.BorderStroke(
