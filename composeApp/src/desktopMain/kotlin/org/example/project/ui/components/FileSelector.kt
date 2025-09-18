@@ -1,17 +1,25 @@
 package org.example.project.ui.components
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import java.awt.datatransfer.DataFlavor
 import java.io.File
@@ -165,7 +173,8 @@ fun FileSelector(
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
-        Button(
+        // Modern file selector button
+        AnimatedGlassButton(
             onClick = {
                 val fileChooser = JFileChooser().apply {
                     fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
@@ -176,52 +185,62 @@ fun FileSelector(
                     onPathSelected(fileChooser.selectedFile.absolutePath)
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            isPrimary = selectedPath == null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(Dimensions.buttonHeightLarge)
         ) {
-            Text(selectedPath ?: "Choose folder with files")
+            Icon(
+                imageVector = Icons.Default.Folder,
+                contentDescription = null,
+                modifier = Modifier.size(Dimensions.iconMedium)
+            )
+            Spacer(Modifier.width(Dimensions.spacingSmall))
+            Text(
+                text = selectedPath?.let { path ->
+                    // Show only the folder name, not the full path
+                    path.substringAfterLast(File.separator).takeIf { it.isNotEmpty() } ?: path
+                } ?: "Choose folder with files",
+                maxLines = 1
+            )
+            if (selectedPath != null) {
+                Spacer(Modifier.width(Dimensions.spacingSmall))
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = "Selected",
+                    modifier = Modifier.size(Dimensions.iconSmall),
+                    tint = TerminalSuccess
+                )
+            }
+        }
+
+        if (selectedPath != null) {
+            // Show full path in small text
+            Text(
+                text = selectedPath,
+                style = MaterialTheme.typography.bodySmall,
+                color = TerminalText,
+                modifier = Modifier.padding(top = Dimensions.spacingXSmall),
+                maxLines = 1
+            )
         }
 
         Spacer(modifier = Modifier.height(Dimensions.spacingMedium))
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(Dimensions.dropZoneHeight)
-                .border(
-                    width = if (isDragging) 3.dp else 2.dp,
-                    color = if (isDragging)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.outline,
-                    shape = MaterialTheme.shapes.small
+        // Modern drag & drop zone
+        ModernDropZone(
+            isDragging = isDragging,
+            onGloballyPositioned = { coordinates ->
+                val location = coordinates.positionInWindow()
+                dropBounds = BoxLayoutInfo(
+                    x = location.x,
+                    y = location.y,
+                    width = coordinates.size.width,
+                    height = coordinates.size.height
                 )
-                .background(
-                    if (isDragging)
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                    else
-                        MaterialTheme.colorScheme.surfaceVariant
-                )
-                .onGloballyPositioned { coordinates ->
-                    val location = coordinates.positionInWindow()
-                    dropBounds = BoxLayoutInfo(
-                        x = location.x,
-                        y = location.y,
-                        width = coordinates.size.width,
-                        height = coordinates.size.height
-                    )
-                    updateDndWindowPosition(window, window.ownedWindows.firstOrNull { it is JWindow } as? JWindow, dropBounds)
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                if (isDragging) "Release to drop folder" else "Drop folder here",
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (isDragging)
-                    MaterialTheme.colorScheme.primary
-                else
-                    MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+                updateDndWindowPosition(window, window.ownedWindows.firstOrNull { it is JWindow } as? JWindow, dropBounds)
+            }
+        )
     }
 }
 
@@ -231,6 +250,84 @@ private data class BoxLayoutInfo(
     val width: Int,
     val height: Int
 )
+
+@Composable
+private fun ModernDropZone(
+    isDragging: Boolean,
+    onGloballyPositioned: (androidx.compose.ui.layout.LayoutCoordinates) -> Unit
+) {
+    val borderColor by animateColorAsState(
+        targetValue = if (isDragging) Primary400 else GlassCardBorder,
+        animationSpec = tween(durationMillis = Dimensions.animationMedium),
+        label = "border_color"
+    )
+    
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isDragging) Primary500.copy(alpha = 0.1f) else GlassCard,
+        animationSpec = tween(durationMillis = Dimensions.animationMedium),
+        label = "background_color"
+    )
+    
+    val scale by animateFloatAsState(
+        targetValue = if (isDragging) 1.02f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "drop_zone_scale"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(Dimensions.dropZoneHeight)
+            .graphicsLayer(
+                scaleX = scale,
+                scaleY = scale
+            )
+            .clip(RoundedCornerShape(Dimensions.radiusMedium))
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        backgroundColor,
+                        backgroundColor.copy(alpha = 0.7f)
+                    )
+                )
+            )
+            .border(
+                width = if (isDragging) 2.dp else 1.dp,
+                color = borderColor,
+                shape = RoundedCornerShape(Dimensions.radiusMedium)
+            )
+            .onGloballyPositioned(onGloballyPositioned),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall)
+        ) {
+            Icon(
+                imageVector = if (isDragging) Icons.Default.FileDownload else Icons.Default.CloudUpload,
+                contentDescription = null,
+                modifier = Modifier.size(Dimensions.iconXLarge),
+                tint = if (isDragging) Primary400 else TerminalText
+            )
+            
+            Text(
+                text = if (isDragging) "Release to drop folder" else "Drop folder here",
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = if (isDragging) FontWeight.SemiBold else FontWeight.Normal
+                ),
+                color = if (isDragging) Primary400 else DarkOnSurface
+            )
+            
+            if (!isDragging) {
+                Text(
+                    text = "or use the button above",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TerminalText.copy(alpha = 0.7f)
+                )
+            }
+        }
+    }
+}
 
 private fun updateDndWindowPosition(parentWindow: ComposeWindow, dndWindow: JWindow?, bounds: BoxLayoutInfo?) {
     if (dndWindow == null || bounds == null) return

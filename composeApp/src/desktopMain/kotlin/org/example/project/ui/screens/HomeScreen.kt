@@ -1,16 +1,22 @@
 package org.example.project.ui.screens
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.example.project.ui.components.*
 import org.example.project.ui.dialogs.*
-import org.example.project.ui.theme.Dimensions
+import org.example.project.ui.theme.*
 import org.example.project.viewmodels.HomeViewModel
 import org.example.project.viewmodels.ThemeViewModel
 
@@ -27,153 +33,53 @@ fun HomeScreen(window: ComposeWindow, themeViewModel: ThemeViewModel) {
         label = "Progress"
     )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(Dimensions.spacingMedium),
-        verticalArrangement = Arrangement.spacedBy(Dimensions.spacingMedium)
+    GradientBackground(
+        modifier = Modifier.fillMaxSize()
     ) {
-        // Top bar with app title and theme controls
-        TopBar(themeViewModel)
-        
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingMedium)
-        ) {
-        // Left Panel - Controls
         Column(
             modifier = Modifier
-                .weight(0.4f)
-                .fillMaxHeight(),
-            verticalArrangement = Arrangement.spacedBy(Dimensions.spacingMedium)
+                .fillMaxSize()
+                .padding(Dimensions.spacingLarge),
+            verticalArrangement = Arrangement.spacedBy(Dimensions.spacingLarge)
         ) {
-            // Main Control Panel (lighter look)
-            Card(
-                modifier = Modifier.fillMaxWidth()
+            // Modern Top Bar
+            ModernTopBar(themeViewModel)
+            
+            // Main Content Grid
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingLarge)
             ) {
+                // Left Panel - Control Dashboard
                 Column(
-                    modifier = Modifier.padding(Dimensions.spacingMedium),
-                    verticalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall)
+                    modifier = Modifier
+                        .weight(0.42f)
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.spacedBy(Dimensions.spacingLarge)
                 ) {
-                    // File Selector
-                    FileSelector(
-                        selectedPath = viewModel.selectedPath,
-                        onPathSelected = viewModel::updateSelectedPath,
-                        window = window,
-                        modifier = Modifier.fillMaxWidth()
+                    // File Selection Card
+                    FileSelectionCard(
+                        viewModel = viewModel,
+                        window = window
                     )
-
-                    Divider(modifier = Modifier.padding(vertical = Dimensions.spacingMedium))
-
-                    // Main Actions
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall)
-                    ) {
-                        Button(
-                            onClick = { viewModel.decrypt() },
-                            enabled = !viewModel.isProcessing,
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(Dimensions.buttonHeight)
-                        ) {
-                            Text("DECRYPT")
-                        }
-
-                        Button(
-                            onClick = { viewModel.encrypt() },
-                            enabled = !viewModel.isProcessing,
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(Dimensions.buttonHeight)
-                        ) {
-                            Text("ENCRYPT")
-                        }
-                    }
-
-                    // Name input
-                    OutlinedTextField(
-                        value = viewModel.nameToInject,
-                        onValueChange = viewModel::updateNameToInject,
-                        label = { Text("Name to inject") },
-                        supportingText = { Text("Only latin characters, numbers and special characters") },
-                        enabled = !viewModel.isProcessing,
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                    
+                    // Main Actions Card
+                    MainActionsCard(
+                        viewModel = viewModel,
+                        progressAnimation = progressAnimation,
+                        onBatchCopy = { showBatchCopyDialog = true },
+                        onAddText = { showAddTextDialog = true },
+                        onDeleteWatermarks = { showDeleteWatermarksDialog = true }
                     )
-
-                    // Additional actions
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall)
-                    ) {
-                        FilledTonalButton(
-                            onClick = { showBatchCopyDialog = true },
-                            enabled = !viewModel.isProcessing,
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(Dimensions.buttonHeight)
-                        ) {
-                            Text("Batch Copy")
-                        }
-
-                        FilledTonalButton(
-                            onClick = { showAddTextDialog = true },
-                            enabled = !viewModel.isProcessing,
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(Dimensions.buttonHeight)
-                        ) {
-                            Text("Add Text")
-                        }
-                    }
-
-                    FilledTonalButton(
-                        onClick = { showDeleteWatermarksDialog = true },
-                        enabled = !viewModel.isProcessing,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(Dimensions.buttonHeight)
-                    ) {
-                        Text("Delete Watermarks")
-                    }
-
-                    // Auto-clear checkbox
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(top = Dimensions.spacingSmall)
-                    ) {
-                        Checkbox(
-                            checked = viewModel.autoClearConsole,
-                            onCheckedChange = viewModel::updateAutoClearConsole,
-                            enabled = !viewModel.isProcessing
-                        )
-                        Text(
-                            "Auto-clear console",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
-                    }
-
-                    // Progress indicator
-                    if (viewModel.isProcessing) {
-                        LinearProgressIndicator(
-                            progress = progressAnimation,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = Dimensions.spacingMedium)
-                        )
-                    }
                 }
-            }
-        }
 
-            // Right Panel - Console
-            ConsoleView(
-                modifier = Modifier
-                    .weight(0.6f)
-                    .fillMaxHeight()
-            )
+                // Right Panel - Terminal Console
+                ConsoleView(
+                    modifier = Modifier
+                        .weight(0.58f)
+                        .fillMaxHeight()
+                )
+            }
         }
     }
 
@@ -218,46 +124,324 @@ fun HomeScreen(window: ComposeWindow, themeViewModel: ThemeViewModel) {
 }
 
 @Composable
-private fun TopBar(
+private fun ModernTopBar(
     themeViewModel: ThemeViewModel,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    GlassCard(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        borderRadius = Dimensions.radiusLarge
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(Dimensions.cardPadding),
+                .padding(Dimensions.cardPaddingLarge),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingMedium)
+                horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingLarge)
             ) {
-                Text(
-                    text = "ENDEcode",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.primary
+                // App Logo/Icon
+                Icon(
+                    imageVector = Icons.Default.Security,
+                    contentDescription = "ENDEcode",
+                    modifier = Modifier.size(Dimensions.iconXLarge),
+                    tint = Primary400
                 )
-                Text(
-                    text = "v2.1.1",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                
+                Column {
+                    Text(
+                        text = "ENDEcode",
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp
+                        ),
+                        color = DarkOnSurface
+                    )
+                    Text(
+                        text = "File Encryption & Watermark Tool",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TerminalText.copy(alpha = 0.8f)
+                    )
+                }
+                
+                // Version badge
+                Surface(
+                    color = Primary500.copy(alpha = 0.2f),
+                    shape = RoundedCornerShape(Dimensions.radiusSmall),
+                    modifier = Modifier.padding(start = Dimensions.spacingSmall)
+                ) {
+                    Text(
+                        text = "v2.1.1",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = Primary400,
+                        modifier = Modifier.padding(
+                            horizontal = Dimensions.spacingSmall,
+                            vertical = Dimensions.spacingXSmall
+                        )
+                    )
+                }
             }
             
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall)
             ) {
+                StatusIndicator(
+                    isActive = true,
+                    activeColor = TerminalSuccess
+                )
                 CompactProfileButton()
                 QuickThemeToggle(themeViewModel)
             }
         }
+    }
+}
+
+@Composable
+private fun FileSelectionCard(
+    viewModel: HomeViewModel,
+    window: ComposeWindow
+) {
+    GlassCard(
+        modifier = Modifier.fillMaxWidth(),
+        borderRadius = Dimensions.radiusLarge
+    ) {
+        Column(
+            modifier = Modifier.padding(Dimensions.cardPaddingLarge),
+            verticalArrangement = Arrangement.spacedBy(Dimensions.spacingMedium)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Folder,
+                    contentDescription = null,
+                    tint = Accent400,
+                    modifier = Modifier.size(Dimensions.iconMedium)
+                )
+                Text(
+                    text = "File Selection",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = DarkOnSurface
+                )
+            }
+            
+            FileSelector(
+                selectedPath = viewModel.selectedPath,
+                onPathSelected = viewModel::updateSelectedPath,
+                window = window,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Composable
+private fun MainActionsCard(
+    viewModel: HomeViewModel,
+    progressAnimation: Float,
+    onBatchCopy: () -> Unit,
+    onAddText: () -> Unit,
+    onDeleteWatermarks: () -> Unit
+) {
+    GlassCard(
+        modifier = Modifier.fillMaxWidth(),
+        borderRadius = Dimensions.radiusLarge
+    ) {
+        Column(
+            modifier = Modifier.padding(Dimensions.cardPaddingLarge),
+            verticalArrangement = Arrangement.spacedBy(Dimensions.spacingLarge)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = null,
+                    tint = Secondary400,
+                    modifier = Modifier.size(Dimensions.iconMedium)
+                )
+                Text(
+                    text = "Actions",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = DarkOnSurface
+                )
+            }
+            
+            // Primary Action Buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingMedium)
+            ) {
+                ModernActionButton(
+                    onClick = { viewModel.decrypt() },
+                    enabled = !viewModel.isProcessing,
+                    icon = Icons.Default.LockOpen,
+                    text = "DECRYPT",
+                    modifier = Modifier.weight(1f),
+                    isPrimary = true
+                )
+
+                ModernActionButton(
+                    onClick = { viewModel.encrypt() },
+                    enabled = !viewModel.isProcessing,
+                    icon = Icons.Default.Lock,
+                    text = "ENCRYPT",
+                    modifier = Modifier.weight(1f),
+                    isPrimary = true
+                )
+            }
+
+            // Name input
+            TerminalTextField(
+                value = viewModel.nameToInject,
+                onValueChange = viewModel::updateNameToInject,
+                label = "Name to inject",
+                supportingText = "Only latin characters, numbers and special characters",
+                enabled = !viewModel.isProcessing,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Secondary Actions Grid
+            Column(
+                verticalArrangement = Arrangement.spacedBy(Dimensions.spacingMedium)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingMedium)
+                ) {
+                    ModernActionButton(
+                        onClick = onBatchCopy,
+                        enabled = !viewModel.isProcessing,
+                        icon = Icons.Default.ContentCopy,
+                        text = "Batch Copy",
+                        modifier = Modifier.weight(1f),
+                        isPrimary = false
+                    )
+
+                    ModernActionButton(
+                        onClick = onAddText,
+                        enabled = !viewModel.isProcessing,
+                        icon = Icons.Default.TextFields,
+                        text = "Add Text",
+                        modifier = Modifier.weight(1f),
+                        isPrimary = false
+                    )
+                }
+
+                ModernActionButton(
+                    onClick = onDeleteWatermarks,
+                    enabled = !viewModel.isProcessing,
+                    icon = Icons.Default.CleaningServices,
+                    text = "Delete Watermarks",
+                    modifier = Modifier.fillMaxWidth(),
+                    isPrimary = false
+                )
+            }
+
+            // Settings Row
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingMedium),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Checkbox(
+                    checked = viewModel.autoClearConsole,
+                    onCheckedChange = viewModel::updateAutoClearConsole,
+                    enabled = !viewModel.isProcessing,
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = TerminalSuccess,
+                        uncheckedColor = TerminalText,
+                        checkmarkColor = GlassBackground
+                    )
+                )
+                Text(
+                    "Auto-clear console",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = DarkOnSurface,
+                    modifier = Modifier.weight(1f)
+                )
+                
+                if (viewModel.isProcessing) {
+                    StatusIndicator(
+                        isActive = true,
+                        activeColor = TerminalWarning
+                    )
+                }
+            }
+
+            // Progress indicator with glassmorphism
+            if (viewModel.isProcessing) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Processing...",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TerminalAccent
+                        )
+                        Text(
+                            text = "${(progressAnimation * 100).toInt()}%",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = TerminalAccent
+                        )
+                    }
+                    LinearProgressIndicator(
+                        progress = progressAnimation,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(6.dp),
+                        color = Primary400,
+                        trackColor = Primary400.copy(alpha = 0.2f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModernActionButton(
+    onClick: () -> Unit,
+    enabled: Boolean,
+    icon: ImageVector,
+    text: String,
+    modifier: Modifier = Modifier,
+    isPrimary: Boolean = false
+) {
+    AnimatedGlassButton(
+        onClick = onClick,
+        enabled = enabled,
+        isPrimary = isPrimary,
+        modifier = modifier.height(Dimensions.buttonHeightLarge)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(Dimensions.iconMedium)
+        )
+        Spacer(Modifier.width(Dimensions.spacingSmall))
+        Text(
+            text = text,
+            fontWeight = if (isPrimary) FontWeight.SemiBold else FontWeight.Medium
+        )
     }
 }

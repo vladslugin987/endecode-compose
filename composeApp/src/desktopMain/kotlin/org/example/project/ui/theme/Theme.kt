@@ -42,10 +42,10 @@ private val LightColorScheme = lightColorScheme(
     secondaryContainer = Secondary100,
     onSecondaryContainer = Secondary800,
     
-    tertiary = Primary700,
+    tertiary = Accent600,
     onTertiary = androidx.compose.ui.graphics.Color.White,
-    tertiaryContainer = Primary50,
-    onTertiaryContainer = Primary900,
+    tertiaryContainer = Accent100,
+    onTertiaryContainer = Accent800,
     
     error = Error600,
     onError = androidx.compose.ui.graphics.Color.White,
@@ -67,36 +67,36 @@ private val LightColorScheme = lightColorScheme(
     inversePrimary = Primary300
 )
 
-// Dark theme color scheme
+// Dark glassmorphism theme color scheme
 private val DarkColorScheme = darkColorScheme(
     primary = Primary400,
-    onPrimary = Primary900,
+    onPrimary = Neutral900,
     primaryContainer = Primary800,
     onPrimaryContainer = Primary200,
     
     secondary = Secondary400,
-    onSecondary = Secondary900,
+    onSecondary = Neutral900,
     secondaryContainer = Secondary800,
     onSecondaryContainer = Secondary200,
     
-    tertiary = Primary300,
-    onTertiary = Primary900,
-    tertiaryContainer = Primary800,
-    onTertiaryContainer = Primary100,
+    tertiary = Accent400,
+    onTertiary = Neutral900,
+    tertiaryContainer = Accent800,
+    onTertiaryContainer = Accent200,
     
     error = Error500,
     onError = androidx.compose.ui.graphics.Color.Black,
     errorContainer = androidx.compose.ui.graphics.Color(0xFF5F1A1A),
-    onErrorContainer = Error50,
+    onErrorContainer = Error200,
     
-    background = DarkBackground,
+    background = GlassBackground,
     onBackground = DarkOnBackground,
-    surface = DarkSurface,
+    surface = GlassSurface,
     onSurface = DarkOnSurface,
-    surfaceVariant = DarkSurfaceVariant,
+    surfaceVariant = GlassSurfaceVariant,
     onSurfaceVariant = Neutral400,
     
-    outline = DarkOutline,
+    outline = androidx.compose.ui.graphics.Color(0xFF3B4252),
     scrim = androidx.compose.ui.graphics.Color.Black,
     
     inverseSurface = Neutral100,
@@ -264,13 +264,13 @@ val LocalCustomColors = staticCompositionLocalOf { LightCustomColors }
 val MaterialTheme.customColors: CustomColors
     @Composable get() = LocalCustomColors.current
 
-// Sharper, modern shapes
+// Modern glassmorphism shapes
 private val AppShapes = Shapes(
-    extraSmall = RoundedCornerShape(4.dp),
+    extraSmall = RoundedCornerShape(Dimensions.radiusXSmall),
     small = RoundedCornerShape(Dimensions.radiusSmall),
     medium = RoundedCornerShape(Dimensions.radiusMedium),
     large = RoundedCornerShape(Dimensions.radiusLarge),
-    extraLarge = RoundedCornerShape(16.dp)
+    extraLarge = RoundedCornerShape(Dimensions.radiusXLarge)
 )
 
 @Composable
