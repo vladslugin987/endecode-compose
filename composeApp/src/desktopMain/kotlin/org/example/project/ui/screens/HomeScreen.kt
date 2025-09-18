@@ -211,7 +211,7 @@ private fun ModernTopBar(
                 IconButton(onClick = onOpenProfile) {
                     Icon(
                         imageVector = Icons.Default.Person,
-                        contentDescription = "Profile",
+                        contentDescription = "Open user profile and settings",
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -240,7 +240,7 @@ private fun FileSelectionCard(
             ) {
                 Icon(
                     imageVector = Icons.Default.Folder,
-                    contentDescription = null,
+                    contentDescription = "File selection section",
                     tint = Accent400,
                     modifier = Modifier.size(Dimensions.iconMedium)
                 )
@@ -309,7 +309,7 @@ private fun MainActionsCard(
                     icon = Icons.Default.LockOpen,
                     text = "DECRYPT",
                     modifier = Modifier.weight(1f),
-                    isPrimary = true
+                    variant = ButtonVariant.PRIMARY
                 )
 
                 ModernActionButton(
@@ -318,16 +318,14 @@ private fun MainActionsCard(
                     icon = Icons.Default.Lock,
                     text = "ENCRYPT",
                     modifier = Modifier.weight(1f),
-                    isPrimary = true
+                    variant = ButtonVariant.PRIMARY
                 )
             }
 
-            // Name input
-            TerminalTextField(
+            // Name input with validation and preview
+            NameInjectorInput(
                 value = viewModel.nameToInject,
                 onValueChange = viewModel::updateNameToInject,
-                label = "Name to inject",
-                supportingText = "Only latin characters, numbers and special characters",
                 enabled = !viewModel.isProcessing,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -346,7 +344,7 @@ private fun MainActionsCard(
                         icon = Icons.Default.ContentCopy,
                         text = "Batch Copy",
                         modifier = Modifier.weight(1f),
-                        isPrimary = false
+                        variant = ButtonVariant.SECONDARY
                     )
 
                     ModernActionButton(
@@ -355,7 +353,7 @@ private fun MainActionsCard(
                         icon = Icons.Default.TextFields,
                         text = "Add Text",
                         modifier = Modifier.weight(1f),
-                        isPrimary = false
+                        variant = ButtonVariant.SECONDARY
                     )
                 }
 
@@ -365,7 +363,7 @@ private fun MainActionsCard(
                     icon = Icons.Default.CleaningServices,
                     text = "Delete Watermarks",
                     modifier = Modifier.fillMaxWidth(),
-                    isPrimary = false
+                    variant = ButtonVariant.DESTRUCTIVE
                 )
             }
 
@@ -444,23 +442,27 @@ private fun ModernActionButton(
     icon: ImageVector,
     text: String,
     modifier: Modifier = Modifier,
-    isPrimary: Boolean = false
+    variant: ButtonVariant = ButtonVariant.SECONDARY
 ) {
     AnimatedGlassButton(
         onClick = onClick,
         enabled = enabled,
-        isPrimary = isPrimary,
+        variant = variant,
         modifier = modifier.height(Dimensions.buttonHeightLarge)
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = null,
+            contentDescription = text, // Better accessibility
             modifier = Modifier.size(Dimensions.iconMedium)
         )
         Spacer(Modifier.width(Dimensions.spacingSmall))
         Text(
             text = text,
-            fontWeight = if (isPrimary) FontWeight.SemiBold else FontWeight.Medium
+            fontWeight = when (variant) {
+                ButtonVariant.PRIMARY -> FontWeight.SemiBold
+                ButtonVariant.DESTRUCTIVE -> FontWeight.SemiBold
+                ButtonVariant.SECONDARY -> FontWeight.Medium
+            }
         )
     }
 }
@@ -588,12 +590,12 @@ private fun ProfileHeaderCard(onBack: () -> Unit) {
             
             AnimatedGlassButton(
                 onClick = onBack,
-                isPrimary = false,
+                variant = ButtonVariant.SECONDARY,
                 modifier = Modifier.height(Dimensions.buttonHeight)
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = null,
+                    contentDescription = "Go back to main screen",
                     modifier = Modifier.size(Dimensions.iconSmall)
                 )
                 Spacer(Modifier.width(Dimensions.spacingSmall))

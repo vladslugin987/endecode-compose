@@ -9,9 +9,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Terminal
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,9 +32,32 @@ fun ConsoleView(
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val logs = ConsoleState.logs
+    
+    // Enhanced terminal state
+    var searchQuery by remember { mutableStateOf("") }
+    var showSearch by remember { mutableStateOf(false) }
+    var fontSize by remember { mutableStateOf(14.sp) }
+    var autoScroll by remember { mutableStateOf(true) }
+    var logFilter by remember { mutableStateOf("all") } // all, info, warning, error, success
+    
+    // Filter logs based on search and filter
+    val filteredLogs = remember(logs, searchQuery, logFilter) {
+        logs.withIndex().filter { (_, log) ->
+            val matchesSearch = if (searchQuery.isBlank()) true else 
+                log.contains(searchQuery, ignoreCase = true)
+            val matchesFilter = when (logFilter) {
+                "info" -> log.contains("info", ignoreCase = true)
+                "warning" -> log.contains("warning", ignoreCase = true)
+                "error" -> log.contains("error", ignoreCase = true)
+                "success" -> log.contains("success", ignoreCase = true)
+                else -> true
+            }
+            matchesSearch && matchesFilter
+        }.toList()
+    }
 
     LaunchedEffect(logs.size) {
-        if (logs.isNotEmpty()) {
+        if (logs.isNotEmpty() && autoScroll) {
             coroutineScope.launch {
                 listState.animateScrollToItem(logs.size - 1)
             }
@@ -50,11 +71,32 @@ fun ConsoleView(
         Column(
             modifier = Modifier.padding(Dimensions.cardPadding)
         ) {
-            // Terminal header with modern styling
-            ModernTerminalHeader(
+            // Enhanced terminal header
+            EnhancedTerminalHeader(
                 onInfoClick = { showInfo() },
-                onClearClick = { ConsoleState.clear() }
+                onClearClick = { ConsoleState.clear() },
+                onSearchToggle = { showSearch = !showSearch },
+                onFontSizeChange = { fontSize = it },
+                onAutoScrollToggle = { autoScroll = !autoScroll },
+                onCopyAll = { /* TODO: Copy all logs to clipboard */ },
+                onSaveLog = { /* TODO: Save logs to file */ },
+                fontSize = fontSize,
+                autoScroll = autoScroll,
+                logFilter = logFilter,
+                onFilterChange = { logFilter = it }
             )
+
+            // Search bar
+            if (showSearch) {
+                Spacer(modifier = Modifier.height(Dimensions.spacingSmall))
+                TerminalTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    label = "Search logs...",
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            }
 
             Spacer(modifier = Modifier.height(Dimensions.spacingMedium))
 
@@ -80,24 +122,39 @@ fun ConsoleView(
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.padding(Dimensions.spacingMedium),
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                        verticalArrangement = Arrangement.spacedBy(3.dp)
                     ) {
-                        items(logs.withIndex().toList()) { (index, log) ->
-                            TerminalLogLine(
+                        items(filteredLogs) { (originalIndex, log) ->
+                            EnhancedTerminalLogLine(
                                 text = log,
-                                lineNumber = index + 1,
-                                isLatest = index == logs.size - 1
+                                lineNumber = originalIndex + 1,
+                                isLatest = originalIndex == logs.size - 1,
+                                fontSize = fontSize,
+                                searchQuery = searchQuery
                             )
+                        }
+                        
+                        // Empty state when filtered
+                        if (filteredLogs.isEmpty() && logs.isNotEmpty()) {
+                            item {
+                                Text(
+                                    text = "No logs match current filter",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(Dimensions.spacingLarge)
+                                )
+                            }
                         }
                     }
                 }
                 
                 // Terminal cursor (blinking)
-                if (logs.isNotEmpty()) {
+                if (logs.isNotEmpty() && filteredLogs.isNotEmpty()) {
                     TerminalCursor(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
-                            .padding(Dimensions.spacingMedium)
+                            .padding(Dimensions.spacingMedium),
+                        fontSize = fontSize
                     )
                 }
             }
