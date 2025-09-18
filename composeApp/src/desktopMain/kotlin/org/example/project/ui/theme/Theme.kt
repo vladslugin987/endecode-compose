@@ -32,10 +32,10 @@ data class ColorFamily(
 
 // Light theme color scheme
 private val LightColorScheme = lightColorScheme(
-    primary = Primary600,
+    primary = Primary500,
     onPrimary = androidx.compose.ui.graphics.Color.White,
-    primaryContainer = Primary100,
-    onPrimaryContainer = Primary800,
+    primaryContainer = Primary200,
+    onPrimaryContainer = Primary900,
     
     secondary = Secondary600,
     onSecondary = androidx.compose.ui.graphics.Color.White,
@@ -52,11 +52,11 @@ private val LightColorScheme = lightColorScheme(
     errorContainer = Error50,
     onErrorContainer = Error600,
     
-    background = Neutral50,
+    background = Neutral100,
     onBackground = Neutral900,
     surface = androidx.compose.ui.graphics.Color.White,
-    onSurface = Neutral900,
-    surfaceVariant = Neutral100,
+    onSurface = Neutral800,
+    surfaceVariant = Neutral200,
     onSurfaceVariant = Neutral700,
     
     outline = Neutral300,
@@ -69,10 +69,10 @@ private val LightColorScheme = lightColorScheme(
 
 // Dark glassmorphism theme color scheme
 private val DarkColorScheme = darkColorScheme(
-    primary = Primary400,
+    primary = Primary300,
     onPrimary = Neutral900,
-    primaryContainer = Primary800,
-    onPrimaryContainer = Primary200,
+    primaryContainer = Primary700,
+    onPrimaryContainer = Primary100,
     
     secondary = Secondary400,
     onSecondary = Neutral900,
@@ -89,12 +89,12 @@ private val DarkColorScheme = darkColorScheme(
     errorContainer = androidx.compose.ui.graphics.Color(0xFF5F1A1A),
     onErrorContainer = Error200,
     
-    background = GlassBackground,
+    background = GlassSurface.copy(alpha = 0.98f),
     onBackground = DarkOnBackground,
-    surface = GlassSurface,
+    surface = GlassSurface.copy(alpha = 0.95f),
     onSurface = DarkOnSurface,
-    surfaceVariant = GlassSurfaceVariant,
-    onSurfaceVariant = Neutral400,
+    surfaceVariant = GlassSurfaceVariant.copy(alpha = 0.95f),
+    onSurfaceVariant = Neutral300,
     
     outline = androidx.compose.ui.graphics.Color(0xFF3B4252),
     scrim = androidx.compose.ui.graphics.Color.Black,

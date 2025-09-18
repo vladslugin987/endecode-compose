@@ -5,6 +5,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,9 +23,11 @@ import org.example.project.ui.theme.*
 import org.example.project.viewmodels.HomeViewModel
 import org.example.project.viewmodels.ThemeViewModel
 
+
 @Composable
 fun HomeScreen(window: ComposeWindow, themeViewModel: ThemeViewModel) {
     val viewModel = remember { HomeViewModel() }
+    var showProfile by remember { mutableStateOf(false) }
 
     var showBatchCopyDialog by remember { mutableStateOf(false) }
     var showAddTextDialog by remember { mutableStateOf(false) }
@@ -43,10 +48,14 @@ fun HomeScreen(window: ComposeWindow, themeViewModel: ThemeViewModel) {
             verticalArrangement = Arrangement.spacedBy(Dimensions.spacingLarge)
         ) {
             // Modern Top Bar
-            ModernTopBar(themeViewModel)
+            ModernTopBar(themeViewModel, onOpenProfile = { showProfile = true })
             
-            // Main Content Grid
-            Row(
+            // Switch between Profile and Main
+            if (showProfile) {
+                EnhancedProfileScreen(onBack = { showProfile = false })
+            } else {
+                // Main Content Grid
+                Row(
                 modifier = Modifier.fillMaxSize(),
                 horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingLarge)
             ) {
@@ -79,6 +88,7 @@ fun HomeScreen(window: ComposeWindow, themeViewModel: ThemeViewModel) {
                         .weight(0.58f)
                         .fillMaxHeight()
                 )
+            }
             }
         }
     }
@@ -126,7 +136,8 @@ fun HomeScreen(window: ComposeWindow, themeViewModel: ThemeViewModel) {
 @Composable
 private fun ModernTopBar(
     themeViewModel: ThemeViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onOpenProfile: () -> Unit = {}
 ) {
     GlassCard(
         modifier = modifier.fillMaxWidth(),
@@ -195,7 +206,13 @@ private fun ModernTopBar(
                     isActive = true,
                     activeColor = TerminalSuccess
                 )
-                CompactProfileButton()
+                IconButton(onClick = onOpenProfile) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Profile",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
                 QuickThemeToggle(themeViewModel)
             }
         }

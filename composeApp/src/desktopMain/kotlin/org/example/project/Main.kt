@@ -38,7 +38,7 @@ fun main() {
             val themeViewModel = remember { ThemeViewModel() }
             
             ENDEcodeTheme(
-                darkTheme = true // Default to dark theme for modern glassmorphism UI
+                darkTheme = themeViewModel.isDarkTheme
             ) {
                 androidx.compose.material3.Surface(
                     color = androidx.compose.material3.MaterialTheme.colorScheme.background,
