@@ -2,6 +2,7 @@ package org.example.project.ui.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -12,11 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import org.example.project.ui.theme.*
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * Glass Card - Modern glassmorphism card component that adapts to theme
@@ -169,15 +173,15 @@ fun TerminalTextField(
             focusedLabelColor = terminalAccent,
             unfocusedLabelColor = terminalText,
             cursorColor = terminalAccent,
-            focusedContainerColor = terminalBg.copy(alpha = 0.8f),
-            unfocusedContainerColor = terminalBg.copy(alpha = 0.6f)
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent
         ),
         shape = RoundedCornerShape(Dimensions.radiusSmall)
     )
 }
 
 /**
- * Gradient background for the main app - adapts to theme
+ * Animated cosmic background with glassmorphism effect
  */
 @Composable
 fun GradientBackground(
@@ -186,34 +190,196 @@ fun GradientBackground(
 ) {
     val isDark = !MaterialTheme.colorScheme.surface.luminance().let { it > 0.5f }
     
-    val gradientColors = if (isDark) {
-        listOf(
-            DarkGlassBackground,
-            DarkGlassSurface.copy(alpha = 0.6f),
-            Primary900.copy(alpha = 0.2f),
-            Secondary800.copy(alpha = 0.1f),
-            DarkGlassBackground
+    // Animation for floating particles
+    val infiniteTransition = rememberInfiniteTransition(label = "cosmic_animation")
+    
+    val offset1 by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(20000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "offset1"
+    )
+    
+    val offset2 by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = -360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(15000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "offset2"
+    )
+    
+    val offset3 by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 180f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(25000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "offset3"
+    )
+    
+    Box(modifier = modifier) {
+        // Base cosmic background
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = if (isDark) {
+                        Brush.radialGradient(
+                            colors = listOf(
+                                Color(0xFF0A0A1A),
+                                Color(0xFF1A1A2E),
+                                Color(0xFF16213E),
+                                Color(0xFF0F0F1C)
+                            ),
+                            radius = 1500f
+                        )
+                    } else {
+                        Brush.radialGradient(
+                            colors = listOf(
+                                Color(0xFFFFFFFF),
+                                Color(0xFFF0F4FF),
+                                Color(0xFFE6F2FF),
+                                Color(0xFFFAFBFF)
+                            ),
+                            radius = 1500f
+                        )
+                    }
+                )
         )
-    } else {
-        listOf(
-            LightGlassBackground,
-            Primary50.copy(alpha = 0.6f),
-            Secondary50.copy(alpha = 0.4f),
-            Accent50.copy(alpha = 0.3f),
-            LightGlassBackground
+        
+        // Animated floating orbs/particles
+        AnimatedCosmicOrbs(
+            isDark = isDark,
+            offset1 = offset1,
+            offset2 = offset2,
+            offset3 = offset3
+        )
+        
+        // Content on top
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            content = content
         )
     }
-    
-    Box(
-        modifier = modifier
-            .background(
+}
+
+@Composable
+private fun AnimatedCosmicOrbs(
+    isDark: Boolean,
+    offset1: Float,
+    offset2: Float,
+    offset3: Float
+) {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val width = size.width
+        val height = size.height
+        
+        if (isDark) {
+            // Dark theme cosmic orbs
+            drawCircle(
                 brush = Brush.radialGradient(
-                    colors = gradientColors,
-                    radius = 1200f
+                    colors = listOf(
+                        Primary400.copy(alpha = 0.15f),
+                        Primary600.copy(alpha = 0.08f),
+                        Color.Transparent
+                    ),
+                    radius = 200f
+                ),
+                radius = 200f,
+                center = Offset(
+                    width * 0.2f + cos(Math.toRadians(offset1.toDouble())).toFloat() * 100f,
+                    height * 0.3f + sin(Math.toRadians(offset1.toDouble())).toFloat() * 80f
                 )
-            ),
-        content = content
-    )
+            )
+            
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        Secondary400.copy(alpha = 0.12f),
+                        Secondary600.copy(alpha = 0.06f),
+                        Color.Transparent
+                    ),
+                    radius = 150f
+                ),
+                radius = 150f,
+                center = Offset(
+                    width * 0.8f + cos(Math.toRadians(offset2.toDouble())).toFloat() * 120f,
+                    height * 0.7f + sin(Math.toRadians(offset2.toDouble())).toFloat() * 100f
+                )
+            )
+            
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        Accent400.copy(alpha = 0.1f),
+                        Accent600.copy(alpha = 0.05f),
+                        Color.Transparent
+                    ),
+                    radius = 180f
+                ),
+                radius = 180f,
+                center = Offset(
+                    width * 0.5f + cos(Math.toRadians(offset3.toDouble())).toFloat() * 80f,
+                    height * 0.5f + sin(Math.toRadians(offset3.toDouble())).toFloat() * 60f
+                )
+            )
+        } else {
+            // Light theme subtle orbs
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        Primary200.copy(alpha = 0.3f),
+                        Primary100.copy(alpha = 0.15f),
+                        Color.Transparent
+                    ),
+                    radius = 250f
+                ),
+                radius = 250f,
+                center = Offset(
+                    width * 0.15f + cos(Math.toRadians(offset1.toDouble())).toFloat() * 80f,
+                    height * 0.25f + sin(Math.toRadians(offset1.toDouble())).toFloat() * 60f
+                )
+            )
+            
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        Secondary200.copy(alpha = 0.25f),
+                        Secondary100.copy(alpha = 0.12f),
+                        Color.Transparent
+                    ),
+                    radius = 200f
+                ),
+                radius = 200f,
+                center = Offset(
+                    width * 0.85f + cos(Math.toRadians(offset2.toDouble())).toFloat() * 100f,
+                    height * 0.75f + sin(Math.toRadians(offset2.toDouble())).toFloat() * 80f
+                )
+            )
+            
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        Accent200.copy(alpha = 0.2f),
+                        Accent100.copy(alpha = 0.1f),
+                        Color.Transparent
+                    ),
+                    radius = 220f
+                ),
+                radius = 220f,
+                center = Offset(
+                    width * 0.6f + cos(Math.toRadians(offset3.toDouble())).toFloat() * 70f,
+                    height * 0.4f + sin(Math.toRadians(offset3.toDouble())).toFloat() * 50f
+                )
+            )
+        }
+    }
 }
 
 /**
