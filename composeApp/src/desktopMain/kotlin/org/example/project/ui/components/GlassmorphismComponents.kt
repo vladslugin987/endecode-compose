@@ -40,8 +40,8 @@ fun GlassCard(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        actualBackgroundColor.copy(alpha = 0.15f),
-                        actualBackgroundColor.copy(alpha = 0.08f)
+                        actualBackgroundColor.copy(alpha = 0.9f),
+                        actualBackgroundColor.copy(alpha = 0.7f)
                     )
                 )
             )

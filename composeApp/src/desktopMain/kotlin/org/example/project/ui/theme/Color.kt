@@ -52,21 +52,21 @@ val Neutral700 = Color(0xFF374151)
 val Neutral800 = Color(0xFF1F2937)
 val Neutral900 = Color(0xFF111827)
 
-// Dark theme glassmorphism colors - More beautiful gradient
-val DarkGlassSurface = Color(0xFF1A1B2E)
-val DarkGlassSurfaceVariant = Color(0xFF2A2B4E) 
-val DarkGlassBackground = Color(0xFF0F0F1C)
-val DarkGlassCard = Color(0x80191A2D) // Semi-transparent card
-val DarkGlassCardBorder = Color(0x40FFFFFF) // Subtle white border
-val DarkGlassHighlight = Color(0x20FFFFFF) // Glass highlight effect
+// Dark theme glassmorphism colors - Better visibility
+val DarkGlassSurface = Color(0xFF1E1F2E)
+val DarkGlassSurfaceVariant = Color(0xFF2D2E3F) 
+val DarkGlassBackground = Color(0xFF141526)
+val DarkGlassCard = Color(0xCC1E1F2E) // More opaque card
+val DarkGlassCardBorder = Color(0x60FFFFFF) // More visible border
+val DarkGlassHighlight = Color(0x30FFFFFF) // Glass highlight effect
 
-// Light theme glassmorphism colors - Very light and airy
-val LightGlassSurface = Color(0xFFFBFCFF)
-val LightGlassSurfaceVariant = Color(0xFFF5F7FA)
-val LightGlassBackground = Color(0xFFFFFFFF)
-val LightGlassCard = Color(0x80F8F9FF) // Semi-transparent card
-val LightGlassCardBorder = Color(0x40E5E7EB) // Subtle border
-val LightGlassHighlight = Color(0x20FFFFFF) // Glass highlight effect
+// Light theme glassmorphism colors - Better contrast
+val LightGlassSurface = Color(0xFFF8F9FA)
+val LightGlassSurfaceVariant = Color(0xFFE9ECEF)
+val LightGlassBackground = Color(0xFFFDFDFD)
+val LightGlassCard = Color(0xCCF8F9FA) // More visible card
+val LightGlassCardBorder = Color(0x80DEE2E6) // More visible border
+val LightGlassHighlight = Color(0x40FFFFFF) // Glass highlight effect
 
 // Backwards compatibility
 val GlassSurface = DarkGlassSurface
@@ -93,20 +93,20 @@ val Warning500 = Color(0xFFF59E0B)
 val Warning600 = Color(0xFFD97706)
 
 // Terminal colors for console - Dark theme
-val DarkTerminalBackground = Color(0xFF0D1117)
-val DarkTerminalText = Color(0xFF7C7C7C)
+val DarkTerminalBackground = Color(0xFF1A1D29)
+val DarkTerminalText = Color(0xFFADB5BD)
 val DarkTerminalAccent = Color(0xFF58A6FF)
 val DarkTerminalSuccess = Color(0xFF3FB950)
 val DarkTerminalWarning = Color(0xFFD29922)
 val DarkTerminalError = Color(0xFFF85149)
 
 // Terminal colors for console - Light theme
-val LightTerminalBackground = Color(0xFFFAFBFF)
-val LightTerminalText = Color(0xFF4A5568)
-val LightTerminalAccent = Color(0xFF3182CE)
-val LightTerminalSuccess = Color(0xFF38A169)
-val LightTerminalWarning = Color(0xFFD69E2E)
-val LightTerminalError = Color(0xFFE53E3E)
+val LightTerminalBackground = Color(0xFFF1F3F4)
+val LightTerminalText = Color(0xFF343A40)
+val LightTerminalAccent = Color(0xFF0D6EFD)
+val LightTerminalSuccess = Color(0xFF198754)
+val LightTerminalWarning = Color(0xFFFFC107)
+val LightTerminalError = Color(0xFFDC3545)
 
 // Backwards compatibility - defaults to dark
 val TerminalBackground = DarkTerminalBackground
@@ -127,6 +127,6 @@ val DarkOutline = Color(0xFF404040)
 val LightSurface = LightGlassSurface
 val LightSurfaceVariant = LightGlassSurfaceVariant
 val LightBackground = LightGlassBackground
-val LightOnSurface = Color(0xFF1A202C)
-val LightOnBackground = Color(0xFF1A202C)
-val LightOutline = Color(0xFFE2E8F0)
+val LightOnSurface = Color(0xFF212529)
+val LightOnBackground = Color(0xFF212529)
+val LightOutline = Color(0xFFCED4DA)
