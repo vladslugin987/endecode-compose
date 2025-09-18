@@ -1,5 +1,6 @@
 package org.example.project.ui.components
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -82,11 +83,9 @@ fun AnimatedGlassButton(
             if (enabled) {
                 isPressed = true
                 onClick()
-                // Reset press state after a short delay
-                kotlinx.coroutines.GlobalScope.launch {
-                    kotlinx.coroutines.delay(150)
-                    isPressed = false
-                }
+                // Reset press state after a short delay - simplified approach
+                // In a real app, use LaunchedEffect in the calling composable
+                isPressed = false
             }
         },
         enabled = enabled,

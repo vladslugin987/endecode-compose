@@ -460,9 +460,29 @@ The Provider.forUseAtConfigurationTime method has been deprecated. This is sched
 	at java.base/java.lang.Thread.run(Thread.java:840)
 
 > Task :composeApp:checkKotlinGradlePluginConfigurationErrors
+> Task :composeApp:compileKotlinDesktop
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:212:28 Unresolved reference: TerminalSuccess
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:222:25 Unresolved reference: TerminalText
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:259:24 Unresolved reference: animateColorAsState
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:260:39 Unresolved reference: Primary400
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:260:55 Unresolved reference: GlassCardBorder
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:265:28 Unresolved reference: animateColorAsState
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:266:39 Unresolved reference: Primary500
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:266:74 Function invocation 'GlassCard(...)' expected
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:266:74 No value passed for parameter 'content'
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:310:40 Unresolved reference: Primary400
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:310:56 Unresolved reference: TerminalText
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:313:13 None of the following functions can be called with the arguments supplied: 
+public fun Text(text: AnnotatedString, modifier: Modifier = ..., color: Color = ..., fontSize: TextUnit = ..., fontStyle: FontStyle? = ..., fontWeight: FontWeight? = ..., fontFamily: FontFamily? = ..., letterSpacing: TextUnit = ..., textDecoration: TextDecoration? = ..., textAlign: TextAlign? = ..., lineHeight: TextUnit = ..., overflow: TextOverflow = ..., softWrap: Boolean = ..., maxLines: Int = ..., minLines: Int = ..., inlineContent: Map<String, InlineTextContent> = ..., onTextLayout: (TextLayoutResult) -> Unit = ..., style: TextStyle = ...): Unit defined in androidx.compose.material3
+public fun Text(text: String, modifier: Modifier = ..., color: Color = ..., fontSize: TextUnit = ..., fontStyle: FontStyle? = ..., fontWeight: FontWeight? = ..., fontFamily: FontFamily? = ..., letterSpacing: TextUnit = ..., textDecoration: TextDecoration? = ..., textAlign: TextAlign? = ..., lineHeight: TextUnit = ..., overflow: TextOverflow = ..., softWrap: Boolean = ..., maxLines: Int = ..., minLines: Int = ..., onTextLayout: (TextLayoutResult) -> Unit = ..., style: TextStyle = ...): Unit defined in androidx.compose.material3
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:318:41 Unresolved reference: Primary400
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:318:57 Unresolved reference: DarkOnSurface
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/FileSelector.kt:325:29 Unresolved reference: TerminalText
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/GlassmorphismComponents.kt:86:48 Unresolved reference: launch
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/GlassmorphismComponents.kt:87:40 Suspend function 'delay' should be called only from a coroutine or another suspend function
+e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/ui/components/GlassmorphismComponents.kt:206:18 Unresolved reference: animateColorAsState
 
 > Task :composeApp:compileKotlinDesktop FAILED
-e: file:///Users/runner/work/endecode-compose/endecode-compose/composeApp/src/desktopMain/kotlin/org/example/project/Main.kt:43:61 Unresolved reference: fillMaxSize
 
 FAILURE: Build failed with an exception.
 
@@ -666,5 +686,5 @@ Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilat
 	... 2 more
 
 
-BUILD FAILED in 1m 23s
+BUILD FAILED in 1m 14s
 2 actionable tasks: 2 executed

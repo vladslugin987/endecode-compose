@@ -1,5 +1,6 @@
 package org.example.project.ui.components
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,6 +21,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import java.awt.datatransfer.DataFlavor
 import java.io.File
@@ -201,7 +203,8 @@ fun FileSelector(
                     // Show only the folder name, not the full path
                     path.substringAfterLast(File.separator).takeIf { it.isNotEmpty() } ?: path
                 } ?: "Choose folder with files",
-                maxLines = 1
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             if (selectedPath != null) {
                 Spacer(Modifier.width(Dimensions.spacingSmall))
