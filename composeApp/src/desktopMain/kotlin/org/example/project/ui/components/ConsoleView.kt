@@ -150,7 +150,7 @@ fun ConsoleView(
                 
                 // Terminal cursor (blinking)
                 if (logs.isNotEmpty() && filteredLogs.isNotEmpty()) {
-                    TerminalCursor(
+                    EnhancedTerminalCursor(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
                             .padding(Dimensions.spacingMedium),
@@ -271,8 +271,9 @@ private fun TerminalLogLine(
 }
 
 @Composable
-private fun TerminalCursor(
-    modifier: Modifier = Modifier
+private fun EnhancedTerminalCursor(
+    modifier: Modifier = Modifier,
+    fontSize: androidx.compose.ui.unit.TextUnit
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "cursor_blink")
     val alpha by infiniteTransition.animateFloat(
@@ -288,7 +289,8 @@ private fun TerminalCursor(
     Text(
         text = "█",
         style = MaterialTheme.typography.bodyMedium.copy(
-            fontFamily = FontFamily.Monospace
+            fontFamily = FontFamily.Monospace,
+            fontSize = fontSize
         ),
         color = TerminalAccent.copy(alpha = alpha),
         modifier = modifier

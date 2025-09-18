@@ -79,11 +79,13 @@ val GlassHighlight = DarkGlassHighlight
 // Status colors
 val Error50 = Color(0xFFFEF2F2)
 val Error200 = Color(0xFFFECACA)
+val Error400 = Color(0xFFF87171)
 val Error500 = Color(0xFFEF4444)
 val Error600 = Color(0xFFDC2626)
 
 val Success50 = Color(0xFFF0FDF4)
 val Success200 = Color(0xFFBBF7D0)
+val Success400 = Color(0xFF4ADE80)
 val Success500 = Color(0xFF22C55E)
 val Success600 = Color(0xFF16A34A)
 
