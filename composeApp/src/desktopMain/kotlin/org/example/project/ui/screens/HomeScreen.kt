@@ -52,7 +52,33 @@ fun HomeScreen(window: ComposeWindow, themeViewModel: ThemeViewModel) {
             
             // Switch between Profile and Main
             if (showProfile) {
-                EnhancedProfileScreen(onBack = { showProfile = false })
+                // Temporary simple profile - TODO: implement enhanced profile
+                GlassCard(borderRadius = Dimensions.radiusLarge) {
+                    Column(modifier = Modifier.padding(Dimensions.cardPaddingLarge)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Profile Section",
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            AnimatedGlassButton(
+                                onClick = { showProfile = false },
+                                isPrimary = false
+                            ) {
+                                Text("Back")
+                            }
+                        }
+                        Spacer(Modifier.height(Dimensions.spacingLarge))
+                        Text(
+                            text = "Enhanced profile UI coming soon...",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             } else {
                 // Main Content Grid
                 Row(

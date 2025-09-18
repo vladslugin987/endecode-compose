@@ -17,31 +17,36 @@ import androidx.compose.ui.unit.dp
 import org.example.project.ui.theme.*
 
 /**
- * Glass Card - Modern glassmorphism card component
+ * Glass Card - Modern glassmorphism card component that adapts to theme
  */
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
     borderRadius: androidx.compose.ui.unit.Dp = Dimensions.radiusMedium,
-    borderColor: Color = GlassCardBorder,
-    backgroundColor: Color = GlassCard,
+    borderColor: Color? = null,
+    backgroundColor: Color? = null,
     elevation: androidx.compose.ui.unit.Dp = Dimensions.glassElevation,
     content: @Composable BoxScope.() -> Unit
 ) {
+    val isDark = !MaterialTheme.colorScheme.surface.luminance().let { it > 0.5f }
+    
+    val actualBorderColor = borderColor ?: if (isDark) DarkGlassCardBorder else LightGlassCardBorder
+    val actualBackgroundColor = backgroundColor ?: if (isDark) DarkGlassCard else LightGlassCard
+    
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(borderRadius))
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        backgroundColor.copy(alpha = 0.1f),
-                        backgroundColor.copy(alpha = 0.05f)
+                        actualBackgroundColor.copy(alpha = 0.15f),
+                        actualBackgroundColor.copy(alpha = 0.08f)
                     )
                 )
             )
             .border(
                 width = Dimensions.glassBorderWidth,
-                color = borderColor,
+                color = actualBorderColor,
                 shape = RoundedCornerShape(borderRadius)
             ),
         content = content
@@ -110,7 +115,7 @@ fun AnimatedGlassButton(
 }
 
 /**
- * Terminal-styled text field for modern console look
+ * Terminal-styled text field that adapts to theme
  */
 @Composable
 fun TerminalTextField(
@@ -122,46 +127,67 @@ fun TerminalTextField(
     enabled: Boolean = true,
     singleLine: Boolean = true
 ) {
+    val isDark = !MaterialTheme.colorScheme.surface.luminance().let { it > 0.5f }
+    
+    val terminalAccent = if (isDark) DarkTerminalAccent else LightTerminalAccent
+    val terminalText = if (isDark) DarkTerminalText else LightTerminalText
+    val terminalBg = if (isDark) DarkTerminalBackground else LightTerminalBackground
+    val onSurface = if (isDark) DarkOnSurface else LightOnSurface
+    
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier,
-        label = label?.let { { Text(it, color = TerminalAccent) } },
-        supportingText = supportingText?.let { { Text(it, color = TerminalText) } },
+        label = label?.let { { Text(it, color = terminalAccent) } },
+        supportingText = supportingText?.let { { Text(it, color = terminalText) } },
         enabled = enabled,
         singleLine = singleLine,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = DarkOnSurface,
-            unfocusedTextColor = DarkOnSurface,
-            focusedBorderColor = TerminalAccent,
-            unfocusedBorderColor = TerminalText.copy(alpha = 0.5f),
-            focusedLabelColor = TerminalAccent,
-            unfocusedLabelColor = TerminalText,
-            cursorColor = TerminalAccent,
-            focusedContainerColor = TerminalBackground.copy(alpha = 0.8f),
-            unfocusedContainerColor = TerminalBackground.copy(alpha = 0.6f)
+            focusedTextColor = onSurface,
+            unfocusedTextColor = onSurface,
+            focusedBorderColor = terminalAccent,
+            unfocusedBorderColor = terminalText.copy(alpha = 0.5f),
+            focusedLabelColor = terminalAccent,
+            unfocusedLabelColor = terminalText,
+            cursorColor = terminalAccent,
+            focusedContainerColor = terminalBg.copy(alpha = 0.8f),
+            unfocusedContainerColor = terminalBg.copy(alpha = 0.6f)
         ),
         shape = RoundedCornerShape(Dimensions.radiusSmall)
     )
 }
 
 /**
- * Gradient background for the main app
+ * Gradient background for the main app - adapts to theme
  */
 @Composable
 fun GradientBackground(
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit
 ) {
+    val isDark = !MaterialTheme.colorScheme.surface.luminance().let { it > 0.5f }
+    
+    val gradientColors = if (isDark) {
+        listOf(
+            DarkGlassBackground,
+            DarkGlassSurface.copy(alpha = 0.4f),
+            Primary900.copy(alpha = 0.1f),
+            DarkGlassBackground
+        )
+    } else {
+        listOf(
+            LightGlassBackground,
+            Primary50.copy(alpha = 0.3f),
+            Secondary50.copy(alpha = 0.2f),
+            LightGlassBackground
+        )
+    }
+    
     Box(
         modifier = modifier
             .background(
                 brush = Brush.radialGradient(
-                    colors = listOf(
-                        GlassBackground,
-                        GlassSurface.copy(alpha = 0.3f),
-                        GlassBackground
-                    ),
+                    colors = gradientColors,
                     radius = 1200f
                 )
             ),

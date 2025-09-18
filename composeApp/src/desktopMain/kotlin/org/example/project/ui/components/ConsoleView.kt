@@ -57,7 +57,10 @@ fun ConsoleView(
 
             Spacer(modifier = Modifier.height(Dimensions.spacingMedium))
 
-            // Terminal content area
+            // Terminal content area - theme adaptive
+            val isDark = !MaterialTheme.colorScheme.surface.luminance().let { it > 0.5f }
+            val terminalBg = if (isDark) DarkTerminalBackground else LightTerminalBackground
+            
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -65,8 +68,8 @@ fun ConsoleView(
                     .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                TerminalBackground,
-                                TerminalBackground.copy(alpha = 0.95f)
+                                terminalBg,
+                                terminalBg.copy(alpha = 0.95f)
                             )
                         )
                     )
@@ -184,13 +187,14 @@ private fun TerminalLogLine(
         horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall)
     ) {
         // Line number
+        val isDark = !MaterialTheme.colorScheme.surface.luminance().let { it > 0.5f }
         Text(
             text = String.format("%3d", lineNumber),
             style = MaterialTheme.typography.bodySmall.copy(
                 fontFamily = FontFamily.Monospace,
                 fontSize = 10.sp
             ),
-            color = TerminalText.copy(alpha = 0.6f),
+            color = (if (isDark) DarkTerminalText else LightTerminalText).copy(alpha = 0.6f),
             modifier = Modifier.width(30.dp)
         )
         
@@ -232,15 +236,18 @@ private fun TerminalCursor(
     )
 }
 
+@Composable
 private fun getLogLineColor(text: String): androidx.compose.ui.graphics.Color {
+    val isDark = !MaterialTheme.colorScheme.surface.luminance().let { it > 0.5f }
+    
     return when {
-        text.contains("error", ignoreCase = true) -> TerminalError
-        text.contains("warning", ignoreCase = true) -> TerminalWarning
-        text.contains("success", ignoreCase = true) -> TerminalSuccess
-        text.contains("info", ignoreCase = true) -> TerminalAccent
-        text.startsWith("=") -> TerminalAccent
-        text.contains("█") -> TerminalAccent // ASCII art
-        else -> TerminalText
+        text.contains("error", ignoreCase = true) -> if (isDark) DarkTerminalError else LightTerminalError
+        text.contains("warning", ignoreCase = true) -> if (isDark) DarkTerminalWarning else LightTerminalWarning
+        text.contains("success", ignoreCase = true) -> if (isDark) DarkTerminalSuccess else LightTerminalSuccess
+        text.contains("info", ignoreCase = true) -> if (isDark) DarkTerminalAccent else LightTerminalAccent
+        text.startsWith("=") -> if (isDark) DarkTerminalAccent else LightTerminalAccent
+        text.contains("█") -> if (isDark) DarkTerminalAccent else LightTerminalAccent // ASCII art
+        else -> if (isDark) DarkTerminalText else LightTerminalText
     }
 }
 

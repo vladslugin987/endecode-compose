@@ -30,21 +30,21 @@ data class ColorFamily(
     val onContainer: androidx.compose.ui.graphics.Color,
 )
 
-// Light theme color scheme
+// Light theme color scheme - Very bright and clean
 private val LightColorScheme = lightColorScheme(
     primary = Primary500,
     onPrimary = androidx.compose.ui.graphics.Color.White,
-    primaryContainer = Primary200,
+    primaryContainer = Primary50,
     onPrimaryContainer = Primary900,
     
     secondary = Secondary600,
     onSecondary = androidx.compose.ui.graphics.Color.White,
-    secondaryContainer = Secondary100,
+    secondaryContainer = Secondary50,
     onSecondaryContainer = Secondary800,
     
     tertiary = Accent600,
     onTertiary = androidx.compose.ui.graphics.Color.White,
-    tertiaryContainer = Accent100,
+    tertiaryContainer = Accent50,
     onTertiaryContainer = Accent800,
     
     error = Error600,
@@ -52,14 +52,14 @@ private val LightColorScheme = lightColorScheme(
     errorContainer = Error50,
     onErrorContainer = Error600,
     
-    background = Neutral100,
-    onBackground = Neutral900,
-    surface = androidx.compose.ui.graphics.Color.White,
-    onSurface = Neutral800,
-    surfaceVariant = Neutral200,
-    onSurfaceVariant = Neutral700,
+    background = LightGlassBackground,
+    onBackground = LightOnBackground,
+    surface = LightGlassSurface,
+    onSurface = LightOnSurface,
+    surfaceVariant = LightGlassSurfaceVariant,
+    onSurfaceVariant = Neutral600,
     
-    outline = Neutral300,
+    outline = LightOutline,
     scrim = androidx.compose.ui.graphics.Color.Black,
     
     inverseSurface = Neutral800,
@@ -67,7 +67,7 @@ private val LightColorScheme = lightColorScheme(
     inversePrimary = Primary300
 )
 
-// Dark glassmorphism theme color scheme
+// Dark glassmorphism theme color scheme - Beautiful gradient background
 private val DarkColorScheme = darkColorScheme(
     primary = Primary300,
     onPrimary = Neutral900,
@@ -89,14 +89,14 @@ private val DarkColorScheme = darkColorScheme(
     errorContainer = androidx.compose.ui.graphics.Color(0xFF5F1A1A),
     onErrorContainer = Error200,
     
-    background = GlassSurface.copy(alpha = 0.98f),
+    background = DarkGlassBackground,
     onBackground = DarkOnBackground,
-    surface = GlassSurface.copy(alpha = 0.95f),
+    surface = DarkGlassSurface,
     onSurface = DarkOnSurface,
-    surfaceVariant = GlassSurfaceVariant.copy(alpha = 0.95f),
+    surfaceVariant = DarkGlassSurfaceVariant,
     onSurfaceVariant = Neutral300,
     
-    outline = androidx.compose.ui.graphics.Color(0xFF3B4252),
+    outline = DarkOutline,
     scrim = androidx.compose.ui.graphics.Color.Black,
     
     inverseSurface = Neutral100,

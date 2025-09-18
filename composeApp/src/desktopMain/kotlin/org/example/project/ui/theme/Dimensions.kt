@@ -10,20 +10,20 @@ object Dimensions {
     val iconButtonSize = 44.dp
     val smallButtonHeight = 36.dp
 
-    // Modern Spacing system
+    // Modern Spacing system - more compact
     val spacingXSmall = 4.dp
     val spacingSmall = 8.dp
-    val spacingMedium = 16.dp
-    val spacingLarge = 24.dp
-    val spacingXLarge = 32.dp
-    val spacingXXLarge = 48.dp
+    val spacingMedium = 12.dp
+    val spacingLarge = 20.dp
+    val spacingXLarge = 28.dp
+    val spacingXXLarge = 40.dp
 
-    // Component sizes
-    val dropZoneHeight = 140.dp
-    val consoleHeight = 320.dp
-    val cardPadding = 20.dp
-    val cardPaddingLarge = 24.dp
-    val dialogPadding = 24.dp
+    // Component sizes - more compact
+    val dropZoneHeight = 120.dp
+    val consoleHeight = 280.dp
+    val cardPadding = 16.dp
+    val cardPaddingLarge = 20.dp
+    val dialogPadding = 20.dp
     
     // Modern Icon sizes
     val iconXSmall = 12.dp
