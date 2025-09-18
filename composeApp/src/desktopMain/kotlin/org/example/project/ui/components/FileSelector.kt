@@ -33,6 +33,13 @@ import javax.swing.JWindow
 import javax.swing.SwingUtilities
 import org.example.project.utils.ConsoleState
 import org.example.project.ui.theme.Dimensions
+import org.example.project.ui.theme.Primary400
+import org.example.project.ui.theme.Primary500
+import org.example.project.ui.theme.TerminalSuccess
+import org.example.project.ui.theme.TerminalText
+import org.example.project.ui.theme.DarkOnSurface
+import org.example.project.ui.theme.GlassCardBorder
+import org.example.project.ui.theme.GlassCard as GlassCardColor
 import java.awt.dnd.*
 import java.awt.Point
 import javax.swing.JPanel
@@ -266,7 +273,7 @@ private fun ModernDropZone(
     )
     
     val backgroundColor by animateColorAsState(
-        targetValue = if (isDragging) Primary500.copy(alpha = 0.1f) else GlassCard,
+        targetValue = if (isDragging) Primary500.copy(alpha = 0.1f) else GlassCardColor,
         animationSpec = tween(durationMillis = Dimensions.animationMedium),
         label = "background_color"
     )
