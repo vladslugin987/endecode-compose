@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
@@ -36,18 +37,35 @@ fun GlassCard(
     
     Box(
         modifier = modifier
+            .shadow(
+                elevation = elevation,
+                shape = RoundedCornerShape(borderRadius),
+                clip = false
+            )
             .clip(RoundedCornerShape(borderRadius))
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(
-                        actualBackgroundColor.copy(alpha = 0.9f),
-                        actualBackgroundColor.copy(alpha = 0.7f)
-                    )
+                    colors = if (isDark) {
+                        listOf(
+                            actualBackgroundColor.copy(alpha = 0.25f),
+                            actualBackgroundColor.copy(alpha = 0.15f)
+                        )
+                    } else {
+                        listOf(
+                            actualBackgroundColor.copy(alpha = 0.85f),
+                            actualBackgroundColor.copy(alpha = 0.65f)
+                        )
+                    }
                 )
             )
             .border(
                 width = Dimensions.glassBorderWidth,
-                color = actualBorderColor,
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        actualBorderColor.copy(alpha = 0.8f),
+                        actualBorderColor.copy(alpha = 0.4f)
+                    )
+                ),
                 shape = RoundedCornerShape(borderRadius)
             ),
         content = content
@@ -171,15 +189,17 @@ fun GradientBackground(
     val gradientColors = if (isDark) {
         listOf(
             DarkGlassBackground,
-            DarkGlassSurface.copy(alpha = 0.4f),
-            Primary900.copy(alpha = 0.1f),
+            DarkGlassSurface.copy(alpha = 0.6f),
+            Primary900.copy(alpha = 0.2f),
+            Secondary800.copy(alpha = 0.1f),
             DarkGlassBackground
         )
     } else {
         listOf(
             LightGlassBackground,
-            Primary50.copy(alpha = 0.3f),
-            Secondary50.copy(alpha = 0.2f),
+            Primary50.copy(alpha = 0.6f),
+            Secondary50.copy(alpha = 0.4f),
+            Accent50.copy(alpha = 0.3f),
             LightGlassBackground
         )
     }

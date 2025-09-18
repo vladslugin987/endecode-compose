@@ -154,12 +154,13 @@ private fun ModernTopBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingLarge)
             ) {
-                // App Logo/Icon
+                // App Logo/Icon - theme adaptive
+                val isDark = !MaterialTheme.colorScheme.surface.luminance().let { it > 0.5f }
                 Icon(
                     imageVector = Icons.Default.Security,
                     contentDescription = "ENDEcode",
                     modifier = Modifier.size(Dimensions.iconXLarge),
-                    tint = Primary400
+                    tint = if (isDark) Primary400 else Primary600
                 )
                 
                 Column {
@@ -169,18 +170,18 @@ private fun ModernTopBar(
                             fontWeight = FontWeight.Bold,
                             fontSize = 24.sp
                         ),
-                        color = DarkOnSurface
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = "File Encryption & Watermark Tool",
                         style = MaterialTheme.typography.bodySmall,
-                        color = TerminalText.copy(alpha = 0.8f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 
-                // Version badge
+                // Version badge - theme adaptive
                 Surface(
-                    color = Primary500.copy(alpha = 0.2f),
+                    color = if (isDark) Primary500.copy(alpha = 0.2f) else Primary100,
                     shape = RoundedCornerShape(Dimensions.radiusSmall),
                     modifier = Modifier.padding(start = Dimensions.spacingSmall)
                 ) {
@@ -189,7 +190,7 @@ private fun ModernTopBar(
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.SemiBold
                         ),
-                        color = Primary400,
+                        color = if (isDark) Primary400 else Primary700,
                         modifier = Modifier.padding(
                             horizontal = Dimensions.spacingSmall,
                             vertical = Dimensions.spacingXSmall
@@ -247,7 +248,7 @@ private fun FileSelectionCard(
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.SemiBold
                     ),
-                    color = DarkOnSurface
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
             
@@ -292,7 +293,7 @@ private fun MainActionsCard(
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.SemiBold
                     ),
-                    color = DarkOnSurface
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
             
@@ -386,7 +387,7 @@ private fun MainActionsCard(
                 Text(
                     "Auto-clear console",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = DarkOnSurface,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
                 )
                 

@@ -32,14 +32,8 @@ import javax.swing.JFileChooser
 import javax.swing.JWindow
 import javax.swing.SwingUtilities
 import org.example.project.utils.ConsoleState
-import org.example.project.ui.theme.Dimensions
-import org.example.project.ui.theme.Primary400
-import org.example.project.ui.theme.Primary500
-import org.example.project.ui.theme.TerminalSuccess
-import org.example.project.ui.theme.TerminalText
-import org.example.project.ui.theme.DarkOnSurface
-import org.example.project.ui.theme.GlassCardBorder
-import org.example.project.ui.theme.GlassCard as GlassCardColor
+import org.example.project.ui.theme.*
+import androidx.compose.ui.graphics.luminance
 import java.awt.dnd.*
 import java.awt.Point
 import javax.swing.JPanel
@@ -225,11 +219,12 @@ fun FileSelector(
         }
 
         if (selectedPath != null) {
-            // Show full path in small text
+            // Show full path in small text - theme adaptive
+            val isDark = !MaterialTheme.colorScheme.surface.luminance().let { it > 0.5f }
             Text(
                 text = selectedPath,
                 style = MaterialTheme.typography.bodySmall,
-                color = TerminalText,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = Dimensions.spacingXSmall),
                 maxLines = 1
             )
@@ -266,14 +261,20 @@ private fun ModernDropZone(
     isDragging: Boolean,
     onGloballyPositioned: (androidx.compose.ui.layout.LayoutCoordinates) -> Unit
 ) {
+    val isDark = !MaterialTheme.colorScheme.surface.luminance().let { it > 0.5f }
+    
     val borderColor by animateColorAsState(
-        targetValue = if (isDragging) Primary400 else GlassCardBorder,
+        targetValue = if (isDragging) Primary400 else if (isDark) DarkGlassCardBorder else LightGlassCardBorder,
         animationSpec = tween(durationMillis = Dimensions.animationMedium),
         label = "border_color"
     )
     
     val backgroundColor by animateColorAsState(
-        targetValue = if (isDragging) Primary500.copy(alpha = 0.1f) else GlassCardColor,
+        targetValue = if (isDragging) {
+            Primary500.copy(alpha = 0.15f)
+        } else {
+            if (isDark) DarkGlassCard else LightGlassCard
+        },
         animationSpec = tween(durationMillis = Dimensions.animationMedium),
         label = "background_color"
     )
@@ -317,7 +318,7 @@ private fun ModernDropZone(
                 imageVector = if (isDragging) Icons.Default.FileDownload else Icons.Default.CloudUpload,
                 contentDescription = null,
                 modifier = Modifier.size(Dimensions.iconXLarge),
-                tint = if (isDragging) Primary400 else TerminalText
+                tint = if (isDragging) Primary400 else MaterialTheme.colorScheme.onSurfaceVariant
             )
             
             Text(
@@ -325,14 +326,14 @@ private fun ModernDropZone(
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontWeight = if (isDragging) FontWeight.SemiBold else FontWeight.Normal
                 ),
-                color = if (isDragging) Primary400 else DarkOnSurface
+                color = if (isDragging) Primary400 else MaterialTheme.colorScheme.onSurface
             )
             
             if (!isDragging) {
                 Text(
                     text = "or use the button above",
                     style = MaterialTheme.typography.bodySmall,
-                    color = TerminalText.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
