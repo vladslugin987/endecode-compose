@@ -1,6 +1,5 @@
-# ENDEcode Compose 🔐
+# ENDEcode Compose
 
-## Important! The project is moving to a paid model 🚀
 
 <div align="center">
 
@@ -19,22 +18,22 @@ A modern file encryption and watermarking tool built with Compose Multiplatform
 
 </div>
 
-## 🌟 Features
+## Features
 
-- 🔒 File encryption with invisible watermarks
-- 🖼️ Visible watermark support for images
-- 📦 Batch processing capabilities
-- 🎯 Drag-and-drop interface
-- 💻 Native desktop application
-- 🚀 Cross-platform support:
+-  File encryption with invisible watermarks
+-  Visible watermark support for images
+-  Batch processing capabilities
+-  Drag-and-drop interface
+-  Native desktop application
+-  Cross-platform support:
     - macOS (Intel & Apple Silicon)
     - Windows (64-bit)
 
-## 📸 Screenshots
+## Screenshots
 
 ![telegram-cloud-photo-size-2-5391238946933040573-y](https://github.com/user-attachments/assets/62758642-9d45-47cc-b389-b60a499c7b85)
 
-## 🚀 Installation
+## Installation
 
 ### macOS
 1. Download the latest DMG from the [Releases](https://github.com/vladslugin987/endecode-compose/releases) page
@@ -64,15 +63,15 @@ cd endecode-compose
 ./gradlew packageMsi
 ```
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Feel free to submit issues and pull requests.
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🔍 See Also
+## See Also
 
 Check out the [Python version](https://github.com/vladslugin987/endecode) of ENDEcode.
 
@@ -88,5 +87,5 @@ Check out the [Python version](https://github.com/vladslugin987/endecode) of END
 > **Author**: vsdev. / Vladislav Slugin
 
 ---
-Made with ❤️ by vsdev.
+vsdev. / Vladislav Slugin
 </div>
