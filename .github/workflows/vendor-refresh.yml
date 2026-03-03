@@ -17,6 +17,17 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Prepare CI cargo config (no vendored source yet)
+        run: |
+          mkdir -p .cargo
+          cat > .cargo/config.toml <<'EOF'
+          [http]
+          check-revoke = false
+
+          [net]
+          git-fetch-with-cli = true
+          EOF
+
       - name: Generate lock file
         run: cargo generate-lockfile
 
