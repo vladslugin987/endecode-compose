@@ -28,10 +28,14 @@ jobs:
           cp Cargo.lock vendor-bundle/Cargo.lock
           cp Cargo.toml vendor-bundle/Cargo.toml
 
+      - name: Pack vendor bundle
+        run: |
+          tar -czf endecode-tauri-rust-vendor.tar.gz -C vendor-bundle .
+
       - name: Upload vendor artifact
         uses: actions/upload-artifact@v4
         with:
           name: endecode-tauri-rust-vendor
-          path: endecode-tauri/src-tauri/vendor-bundle
+          path: endecode-tauri/src-tauri/endecode-tauri-rust-vendor.tar.gz
           if-no-files-found: error
           compression-level: 0

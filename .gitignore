@@ -51,3 +51,8 @@ compose-resources/
 
 # Local configuration
 gradle.properties.local
+
+# Tauri vendor/offline artifacts
+/endecode-tauri/src-tauri/vendor/
+/endecode-tauri/src-tauri/vendor-bundle/
+/endecode-tauri/src-tauri/endecode-tauri-rust-vendor.tar.gz

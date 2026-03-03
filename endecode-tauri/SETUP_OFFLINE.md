@@ -19,17 +19,17 @@ It creates an artifact named:
 
 The artifact contains:
 
-- `vendor/`
-- `.cargo/config.toml` (with source replacement to vendored crates)
-- `Cargo.lock`
-- `Cargo.toml`
+- `endecode-tauri-rust-vendor.tar.gz`
+  - inside: `vendor/`, `.cargo/config.toml`, `Cargo.lock`, `Cargo.toml`
 
 ## How to use the artifact locally
 
 1. Run workflow manually from GitHub Actions (`workflow_dispatch`).
 2. Download artifact `endecode-tauri-rust-vendor`.
-3. Extract artifact contents into:
+3. Extract `endecode-tauri-rust-vendor.tar.gz` into:
    - `endecode-tauri/src-tauri/`
+   - PowerShell example:
+     - `tar -xzf endecode-tauri-rust-vendor.tar.gz -C endecode-tauri/src-tauri`
 4. Ensure these paths exist:
    - `endecode-tauri/src-tauri/vendor/`
    - `endecode-tauri/src-tauri/.cargo/config.toml`
@@ -42,3 +42,6 @@ The artifact contains:
 - Existing local file `src-tauri/.cargo/config.toml` with `check-revoke = false` helps with Windows Schannel revocation checks.
 - Vendored `.cargo/config.toml` from artifact is the one Cargo uses for offline source replacement.
 - If dependencies change in `Cargo.toml`, run `vendor-refresh` again and replace local vendor bundle.
+- Quick validation:
+  - `Get-ChildItem endecode-tauri/src-tauri/vendor/adler2 -Force`
+  - you should see `.cargo-checksum.json`
