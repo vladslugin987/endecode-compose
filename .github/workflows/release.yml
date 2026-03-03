@@ -1,0 +1,108 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# ENDEcode Release Workflow
+#
+# Triggered when you push a tag like  v1.2.3
+#   git tag v1.2.3
+#   git push origin v1.2.3
+#
+# Builds signed installers for:
+#   • macOS  Apple Silicon  (aarch64-apple-darwin)
+#   • macOS  Intel         (x86_64-apple-darwin)
+#   • Windows x64          (x86_64-pc-windows-msvc)
+#
+# Publishes a GitHub Release with:
+#   • .dmg / .msi installers  ← download count goes to your GitHub stats
+#   • latest.json             ← used by the in-app updater
+#
+# ── Required GitHub Secrets ───────────────────────────────────────────────────
+#   TAURI_SIGNING_PRIVATE_KEY          (generate once, see README)
+#   TAURI_SIGNING_PRIVATE_KEY_PASSWORD (can be empty string)
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  build-release:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            target: aarch64-apple-darwin
+            label: macos-arm
+          - platform: macos-latest
+            target: x86_64-apple-darwin
+            label: macos-intel
+          - platform: windows-latest
+            target: x86_64-pc-windows-msvc
+            label: windows
+
+    runs-on: ${{ matrix.platform }}
+    defaults:
+      run:
+        working-directory: endecode-tauri
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: endecode-tauri/package-lock.json
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: endecode-tauri/src-tauri -> target
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      # ── Unpack vendor bundle (offline Rust deps) ──────────────────────────
+      # Download the latest vendor artifact from vendor-refresh workflow.
+      - name: Download vendor artifact
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: vendor-refresh.yml
+          name: endecode-tauri-rust-vendor
+          path: endecode-tauri/src-tauri/vendor-bundle
+
+      - name: Unpack vendor
+        shell: bash
+        run: |
+          tar -xzf src-tauri/vendor-bundle/endecode-tauri-rust-vendor.tar.gz \
+              -C src-tauri
+
+      # ── Build & publish ───────────────────────────────────────────────────
+      - name: Build and publish release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          projectPath: endecode-tauri
+          tagName: ${{ github.ref_name }}
+          releaseName: "ENDEcode v__VERSION__"
+          releaseBody: |
+            ## What's new
+            See commit history for changes.
+
+            ---
+            **Downloads counted here automatically appear in your GitHub repository statistics.**
+          releaseDraft: false
+          prerelease: false
+          args: --target ${{ matrix.target }}
