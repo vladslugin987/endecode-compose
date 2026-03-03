@@ -3,9 +3,11 @@ import { ActionButton } from "../../components/ui/ActionButton";
 import { TextInput } from "../../components/ui/TextInput";
 import { useOperationsStore } from "../../store/useOperationsStore";
 import { useConsoleStore } from "../../store/useConsoleStore";
-import { addTextToPhoto, batchCopy, cancelJob, decryptFolder, encryptFolder } from "../../lib/tauriApi";
+import { addTextToPhoto, addVideoWatermark, batchCopy, cancelJob, decryptFolder, encryptFolder } from "../../lib/tauriApi";
 import { BatchDialog } from "../batch/BatchDialog";
 import { AddTextDialog } from "../add-text/AddTextDialog";
+import { VideoWatermarkDialog } from "../video-watermark/VideoWatermarkDialog";
+import { UpdaterDialog } from "../updater/UpdaterDialog";
 
 export function OperationsPanel() {
   const selectedPath = useOperationsStore((s) => s.selectedPath);
@@ -19,6 +21,8 @@ export function OperationsPanel() {
 
   const [showBatch, setShowBatch] = useState(false);
   const [showAddText, setShowAddText] = useState(false);
+  const [showVideoWatermark, setShowVideoWatermark] = useState(false);
+  const [showUpdater, setShowUpdater] = useState(false);
 
   function ensurePath() {
     if (!selectedPath) {
@@ -78,6 +82,12 @@ export function OperationsPanel() {
         <ActionButton disabled={isProcessing} onClick={() => setShowAddText(true)}>
           Add Text
         </ActionButton>
+        <ActionButton disabled={isProcessing} onClick={() => setShowVideoWatermark(true)}>
+          Video Watermark
+        </ActionButton>
+        <ActionButton onClick={() => setShowUpdater(true)}>
+          Check for Updates
+        </ActionButton>
       </div>
 
       <div className="mt-3 flex items-center gap-3">
@@ -103,6 +113,7 @@ export function OperationsPanel() {
       <BatchDialog
         open={showBatch}
         onClose={() => setShowBatch(false)}
+        selectedPath={selectedPath}
         onConfirm={async (payload) => {
           if (!ensurePath()) return;
           const result = await batchCopy({
@@ -116,16 +127,36 @@ export function OperationsPanel() {
       <AddTextDialog
         open={showAddText}
         onClose={() => setShowAddText(false)}
-        onConfirm={async (text, photoNumber) => {
+        selectedPath={selectedPath}
+        onConfirm={async (text, photoNumber, scale, opacity) => {
           if (!ensurePath()) return;
           const result = await addTextToPhoto({
             folder_path: selectedPath,
             text,
             photo_number: photoNumber,
+            visible_scale: scale,
+            visible_opacity: opacity,
           });
           startJob(result.job_id);
         }}
       />
+
+      <VideoWatermarkDialog
+        open={showVideoWatermark}
+        onClose={() => setShowVideoWatermark(false)}
+        onConfirm={async (text, timestampSec, fontSize) => {
+          if (!ensurePath()) return;
+          const result = await addVideoWatermark({
+            folder_path: selectedPath,
+            text,
+            timestamp_sec: timestampSec,
+            font_size: fontSize,
+          });
+          startJob(result.job_id);
+        }}
+      />
+
+      <UpdaterDialog open={showUpdater} onClose={() => setShowUpdater(false)} />
     </div>
   );
 }

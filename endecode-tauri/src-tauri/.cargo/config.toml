@@ -1,9 +1,3 @@
-[http]
-check-revoke = false
-
-[net]
-git-fetch-with-cli = true
-
 [source.crates-io]
 replace-with = "vendored-sources"
 

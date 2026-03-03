@@ -8,9 +8,18 @@ type Props = {
 
 export function FolderPicker({ selectedPath, onSelect }: Props) {
   async function pickFolder() {
-    const result = await open({ directory: true, multiple: false });
-    if (typeof result === "string") {
-      onSelect(result);
+    try {
+      const result = await open({
+        directory: true,
+        multiple: false,
+        title: "Select folder",
+      });
+
+      if (typeof result === "string") {
+        onSelect(result);
+      }
+    } catch (error) {
+      console.error("Failed to open folder picker:", error);
     }
   }
 

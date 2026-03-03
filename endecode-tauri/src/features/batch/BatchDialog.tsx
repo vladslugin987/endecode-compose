@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ActionButton } from "../../components/ui/ActionButton";
 import { TextInput } from "../../components/ui/TextInput";
+import { WatermarkPreview } from "../preview/WatermarkPreview";
 
 type BatchPayload = {
   num_copies: number;
@@ -10,15 +11,18 @@ type BatchPayload = {
   create_zip: boolean;
   watermark_text?: string;
   photo_number?: number;
+  visible_size?: "small" | "medium" | "large";
+  visible_opacity?: number;
 };
 
 type Props = {
   open: boolean;
   onClose: () => void;
+  selectedPath: string;
   onConfirm: (payload: BatchPayload) => void;
 };
 
-export function BatchDialog({ open, onClose, onConfirm }: Props) {
+export function BatchDialog({ open, onClose, onConfirm, selectedPath }: Props) {
   const [copies, setCopies] = useState("1");
   const [baseText, setBaseText] = useState("ORDER");
   const [addSwap, setAddSwap] = useState(false);
@@ -26,6 +30,8 @@ export function BatchDialog({ open, onClose, onConfirm }: Props) {
   const [createZip, setCreateZip] = useState(false);
   const [watermarkText, setWatermarkText] = useState("");
   const [photoNumber, setPhotoNumber] = useState("");
+  const [visibleSize, setVisibleSize] = useState<"small" | "medium" | "large">("medium");
+  const [visibleOpacity, setVisibleOpacity] = useState("160");
 
   if (!open) return null;
 
@@ -43,6 +49,29 @@ export function BatchDialog({ open, onClose, onConfirm }: Props) {
             <>
               <TextInput label="Watermark text (optional)" value={watermarkText} onChange={(e) => setWatermarkText(e.target.value)} />
               <TextInput label="Photo number (optional)" value={photoNumber} onChange={(e) => setPhotoNumber(e.target.value)} />
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="text-slate-300">Visible watermark size</span>
+                <select
+                  className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100"
+                  value={visibleSize}
+                  onChange={(e) => setVisibleSize(e.target.value as "small" | "medium" | "large")}
+                >
+                  <option value="small">Small</option>
+                  <option value="medium">Medium</option>
+                  <option value="large">Large</option>
+                </select>
+              </label>
+              <TextInput
+                label="Visible watermark opacity (30-255)"
+                value={visibleOpacity}
+                onChange={(e) => setVisibleOpacity(e.target.value)}
+              />
+              <WatermarkPreview
+                selectedPath={selectedPath}
+                text={watermarkText || "001"}
+                size={visibleSize}
+                opacity={Math.min(255, Math.max(30, Number(visibleOpacity) || 160))}
+              />
             </>
           )}
         </div>
@@ -61,6 +90,8 @@ export function BatchDialog({ open, onClose, onConfirm }: Props) {
                 create_zip: createZip,
                 watermark_text: watermarkText.trim() || undefined,
                 photo_number: photoNumber.trim() ? Number(photoNumber) : undefined,
+                visible_size: addWatermark ? visibleSize : undefined,
+                visible_opacity: addWatermark ? Math.min(255, Math.max(30, Number(visibleOpacity) || 160)) : undefined,
               });
               onClose();
             }}

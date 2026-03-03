@@ -10,12 +10,11 @@ export function useJobEvents() {
   const finishJob = useOperationsStore((state) => state.finishJob);
 
   useEffect(() => {
-    let unlistenLog: (() => void) | undefined;
-    let unlistenProgress: (() => void) | undefined;
-    let unlistenDone: (() => void) | undefined;
+    let disposed = false;
+    const unlisteners: Array<() => void> = [];
 
     void (async () => {
-      unlistenLog = await listen<{
+      const unlistenLog = await listen<{
         job_id: string;
         level: "info" | "warn" | "error" | "success";
         message: string;
@@ -29,8 +28,13 @@ export function useJobEvents() {
           ts: payload.ts,
         } satisfies ConsoleLog);
       });
+      if (disposed) {
+        unlistenLog();
+        return;
+      }
+      unlisteners.push(unlistenLog);
 
-      unlistenProgress = await listen<{
+      const unlistenProgress = await listen<{
         job_id: string;
         progress: number;
         current_file?: string;
@@ -44,8 +48,13 @@ export function useJobEvents() {
           stage: payload.stage,
         } satisfies JobProgress);
       });
+      if (disposed) {
+        unlistenProgress();
+        return;
+      }
+      unlisteners.push(unlistenProgress);
 
-      unlistenDone = await listen<{
+      const unlistenDone = await listen<{
         job_id: string;
         status: "ok" | "error" | "cancelled";
         summary?: Record<string, unknown>;
@@ -59,12 +68,18 @@ export function useJobEvents() {
           error: payload.error,
         } satisfies JobDone);
       });
+      if (disposed) {
+        unlistenDone();
+        return;
+      }
+      unlisteners.push(unlistenDone);
     })();
 
     return () => {
-      unlistenLog?.();
-      unlistenProgress?.();
-      unlistenDone?.();
+      disposed = true;
+      for (const unlisten of unlisteners) {
+        unlisten();
+      }
     };
   }, [applyProgress, finishJob, pushLog]);
 }

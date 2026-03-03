@@ -20,6 +20,8 @@ pub struct BatchRequest {
     pub create_zip: bool,
     pub watermark_text: Option<String>,
     pub photo_number: Option<u32>,
+    pub visible_size: Option<String>,
+    pub visible_opacity: Option<u8>,
 }
 
 #[derive(Debug, Serialize)]
@@ -41,6 +43,19 @@ pub async fn batch_copy(
 
     let job_id = Uuid::new_v4().to_string();
     state.register_job(&job_id);
+    let state = state.inner().clone();
+    let output_folder = source_folder
+        .parent()
+        .unwrap_or_else(|| std::path::Path::new("."))
+        .join(format!(
+            "{}-Copies",
+            source_folder
+                .file_name()
+                .and_then(|n| n.to_str())
+                .unwrap_or("Source")
+        ))
+        .display()
+        .to_string();
     emit_log(
         &app,
         JobLogEvent {
@@ -52,7 +67,7 @@ pub async fn batch_copy(
     );
 
     let options = BatchOptions {
-        source_folder,
+        source_folder: source_folder.clone(),
         num_copies: payload.num_copies,
         base_text: payload.base_text,
         add_swap: payload.add_swap,
@@ -60,71 +75,89 @@ pub async fn batch_copy(
         create_zip: payload.create_zip,
         watermark_text: payload.watermark_text,
         photo_number: payload.photo_number,
+        visible_size: payload.visible_size,
+        visible_opacity: payload.visible_opacity,
     };
 
-    let result = batch::perform_batch_copy_and_encode(
-        options,
-        |progress, current_file, stage| {
-            emit_progress(
-                &app,
-                JobProgressEvent {
-                    job_id: job_id.clone(),
-                    progress,
-                    current_file,
-                    stage,
-                },
-            );
-        },
-        || state.is_cancelled(&job_id),
-    );
+    let app_clone = app.clone();
+    let job_id_clone = job_id.clone();
+    let output_folder_clone = output_folder.clone();
+    tauri::async_runtime::spawn(async move {
+        let result = batch::perform_batch_copy_and_encode(
+            options,
+            |progress, current_file, stage| {
+                emit_progress(
+                    &app_clone,
+                    JobProgressEvent {
+                        job_id: job_id_clone.clone(),
+                        progress,
+                        current_file,
+                        stage,
+                    },
+                );
+            },
+            |level, message| {
+                let mapped = match level {
+                    "error" => LogLevel::Error,
+                    "warn" => LogLevel::Warn,
+                    "success" => LogLevel::Success,
+                    _ => LogLevel::Info,
+                };
+                emit_log(
+                    &app_clone,
+                    JobLogEvent {
+                        job_id: job_id_clone.clone(),
+                        level: mapped,
+                        message,
+                        ts: now_iso(),
+                    },
+                );
+            },
+            || state.is_cancelled(&job_id_clone),
+        );
 
-    match result {
-        Ok(output_folder) => {
-            emit_done(
-                &app,
-                JobDoneEvent {
-                    job_id: job_id.clone(),
-                    status: "ok".to_string(),
-                    summary: Some(
-                        serde_json::json!({ "output_folder": output_folder.display().to_string() }),
-                    ),
-                    error: None,
-                },
-            );
-            state.finish_job(&job_id);
-            Ok(BatchResponse {
-                job_id,
-                output_folder: output_folder.display().to_string(),
-            })
+        match result {
+            Ok(output_folder_path) => {
+                emit_done(
+                    &app_clone,
+                    JobDoneEvent {
+                        job_id: job_id_clone.clone(),
+                        status: "ok".to_string(),
+                        summary: Some(
+                            serde_json::json!({ "output_folder": output_folder_path.display().to_string() }),
+                        ),
+                        error: None,
+                    },
+                );
+            }
+            Err(err) if err == "Cancelled" => {
+                emit_done(
+                    &app_clone,
+                    JobDoneEvent {
+                        job_id: job_id_clone.clone(),
+                        status: "cancelled".to_string(),
+                        summary: None,
+                        error: None,
+                    },
+                );
+            }
+            Err(err) => {
+                emit_done(
+                    &app_clone,
+                    JobDoneEvent {
+                        job_id: job_id_clone.clone(),
+                        status: "error".to_string(),
+                        summary: None,
+                        error: Some(err),
+                    },
+                );
+            }
         }
-        Err(err) if err == "Cancelled" => {
-            emit_done(
-                &app,
-                JobDoneEvent {
-                    job_id: job_id.clone(),
-                    status: "cancelled".to_string(),
-                    summary: None,
-                    error: None,
-                },
-            );
-            state.finish_job(&job_id);
-            Ok(BatchResponse {
-                job_id,
-                output_folder: String::new(),
-            })
-        }
-        Err(err) => {
-            emit_done(
-                &app,
-                JobDoneEvent {
-                    job_id: job_id.clone(),
-                    status: "error".to_string(),
-                    summary: None,
-                    error: Some(err.clone()),
-                },
-            );
-            state.finish_job(&job_id);
-            Err(err)
-        }
-    }
+        state.finish_job(&job_id_clone);
+    });
+
+    Ok(BatchResponse {
+        job_id,
+        output_folder: output_folder_clone,
+    })
 }

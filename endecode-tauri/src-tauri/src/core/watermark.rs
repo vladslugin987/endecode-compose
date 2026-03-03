@@ -116,6 +116,102 @@ pub fn add_watermark(path: &Path, encoded_text: &str) -> Result<bool, String> {
     Ok(true)
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Write;
+    use tempfile::NamedTempFile;
+
+    fn make_file(content: &[u8]) -> NamedTempFile {
+        let mut f = NamedTempFile::new().unwrap();
+        f.write_all(content).unwrap();
+        f
+    }
+
+    // ── has_watermark ────────────────────────────────────────────────────────
+
+    #[test]
+    fn has_watermark_returns_false_for_clean_file() {
+        let f = make_file(b"plain binary content without any marker");
+        assert!(!has_watermark(f.path()).unwrap());
+    }
+
+    #[test]
+    fn has_watermark_returns_true_after_add() {
+        let f = make_file(b"some content");
+        add_watermark(f.path(), "ENCODED_TEXT").unwrap();
+        assert!(has_watermark(f.path()).unwrap());
+    }
+
+    // ── add_watermark ────────────────────────────────────────────────────────
+
+    #[test]
+    fn add_watermark_returns_true_first_time() {
+        let f = make_file(b"data");
+        assert!(add_watermark(f.path(), "ORDER001").unwrap());
+    }
+
+    #[test]
+    fn add_watermark_returns_false_if_already_present() {
+        let f = make_file(b"data");
+        add_watermark(f.path(), "ORDER001").unwrap();
+        assert!(!add_watermark(f.path(), "ORDER001").unwrap());
+    }
+
+    #[test]
+    fn add_watermark_does_not_corrupt_original_bytes() {
+        let original = b"binary\x00\xFF\xFEdata";
+        let f = make_file(original);
+        add_watermark(f.path(), "MARK").unwrap();
+        let bytes = std::fs::read(f.path()).unwrap();
+        assert!(bytes.starts_with(original));
+    }
+
+    // ── extract_watermark_text ───────────────────────────────────────────────
+
+    #[test]
+    fn extract_returns_none_for_clean_file() {
+        let f = make_file(b"no watermark here");
+        assert!(extract_watermark_text(f.path()).unwrap().is_none());
+    }
+
+    #[test]
+    fn extract_roundtrip() {
+        let f = make_file(b"payload data");
+        add_watermark(f.path(), "MY_ENCODED_TEXT").unwrap();
+        let extracted = extract_watermark_text(f.path()).unwrap().unwrap();
+        assert_eq!(extracted, "MY_ENCODED_TEXT");
+    }
+
+    // ── remove_watermark ─────────────────────────────────────────────────────
+
+    #[test]
+    fn remove_watermark_restores_original_size() {
+        let original = b"original bytes here";
+        let f = make_file(original);
+        add_watermark(f.path(), "MARK").unwrap();
+        assert!(remove_watermark(f.path()).unwrap());
+        let after = std::fs::read(f.path()).unwrap();
+        assert_eq!(after, original);
+    }
+
+    #[test]
+    fn remove_watermark_returns_false_on_clean_file() {
+        let f = make_file(b"no watermark");
+        assert!(!remove_watermark(f.path()).unwrap());
+    }
+
+    #[test]
+    fn add_after_remove_works() {
+        let f = make_file(b"data");
+        add_watermark(f.path(), "FIRST").unwrap();
+        remove_watermark(f.path()).unwrap();
+        assert!(add_watermark(f.path(), "SECOND").unwrap());
+        let text = extract_watermark_text(f.path()).unwrap().unwrap();
+        assert_eq!(text, "SECOND");
+    }
+}
+
 pub fn remove_watermark(path: &Path) -> Result<bool, String> {
     let Some((tail_data, file_size)) = read_watermark_data(path)? else {
         return Ok(false);

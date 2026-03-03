@@ -31,5 +31,17 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "PLACEHOLDER_PUBLIC_KEY_REPLACE_AFTER_KEYGEN",
+      "endpoints": [
+        "https://github.com/REPLACE_OWNER/REPLACE_REPO/releases/latest/download/latest.json"
+      ],
+      "dialog": false,
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }

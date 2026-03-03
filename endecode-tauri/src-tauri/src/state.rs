@@ -19,20 +19,20 @@ impl AppState {
     }
 
     pub fn cancel_job(&self, job_id: &str) -> bool {
-        if let Ok(jobs) = self.jobs.lock()
-            && let Some(flag) = jobs.get(job_id)
-        {
-            flag.store(true, Ordering::Relaxed);
-            return true;
+        if let Ok(jobs) = self.jobs.lock() {
+            if let Some(flag) = jobs.get(job_id) {
+                flag.store(true, Ordering::Relaxed);
+                return true;
+            }
         }
         false
     }
 
     pub fn is_cancelled(&self, job_id: &str) -> bool {
-        if let Ok(jobs) = self.jobs.lock()
-            && let Some(flag) = jobs.get(job_id)
-        {
-            return flag.load(Ordering::Relaxed);
+        if let Ok(jobs) = self.jobs.lock() {
+            if let Some(flag) = jobs.get(job_id) {
+                return flag.load(Ordering::Relaxed);
+            }
         }
         false
     }

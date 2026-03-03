@@ -7,7 +7,11 @@ use std::{
 use regex::Regex;
 use zip::{write::SimpleFileOptions, CompressionMethod, ZipWriter};
 
-use super::{encoding, fs_utils, image_text::TextPosition, watermark};
+use super::{
+    encoding, fs_utils,
+    image_text::{TextPosition, VisibleWatermarkSize, VisibleWatermarkStyle},
+    watermark,
+};
 
 #[derive(Debug, Clone)]
 pub struct BatchOptions {
@@ -19,11 +23,14 @@ pub struct BatchOptions {
     pub create_zip: bool,
     pub watermark_text: Option<String>,
     pub photo_number: Option<u32>,
+    pub visible_size: Option<String>,
+    pub visible_opacity: Option<u8>,
 }
 
 pub fn perform_batch_copy_and_encode<F, C>(
     options: BatchOptions,
     mut on_progress: F,
+    mut on_log: impl FnMut(&str, String),
     mut is_cancelled: C,
 ) -> Result<PathBuf, String>
 where
@@ -41,6 +48,7 @@ where
     if !copies_folder.exists() {
         fs::create_dir_all(&copies_folder)
             .map_err(|e| format!("Error creating copies folder {}: {e}", copies_folder.display()))?;
+        on_log("info", format!("Created copies folder: {}", copies_folder.display()));
     }
 
     let start_number = extract_start_number(&options.base_text);
@@ -72,6 +80,7 @@ where
         let order_folder = copies_folder.join(&order_number);
         fs::create_dir_all(&order_folder)
             .map_err(|e| format!("Error creating order folder {}: {e}", order_folder.display()))?;
+        on_log("info", format!("Processing order folder: {order_number}"));
         let destination = order_folder.join(
             source_folder
                 .file_name()
@@ -80,10 +89,16 @@ where
         );
 
         fs_utils::copy_directory(&source_folder, &destination)?;
+        on_log("success", format!("Copied source to {}", destination.display()));
         completed += 1.0;
         on_progress(completed / total_ops, None, Some("copy".to_string()));
 
-        process_files(&destination, &base_text_without_number, &order_number)?;
+        let style = VisibleWatermarkStyle {
+            size: VisibleWatermarkSize::from_optional_str(options.visible_size.as_deref()),
+            opacity: options.visible_opacity.unwrap_or(200).clamp(30, 255),
+            scale_override: None,
+        };
+        process_files(&destination, &base_text_without_number, &order_number, &mut on_log)?;
         completed += 1.0;
         on_progress(completed / total_ops, None, Some("encode".to_string()));
 
@@ -93,13 +108,13 @@ where
                 .watermark_text
                 .clone()
                 .unwrap_or_else(|| order_number.clone());
-            add_visible_watermark_to_photo(&destination, &actual_text, actual_photo_number)?;
+            add_visible_watermark_to_photo(&destination, &actual_text, actual_photo_number, style, &mut on_log)?;
             completed += 1.0;
             on_progress(completed / total_ops, None, Some("watermark".to_string()));
         }
 
         if options.add_swap {
-            perform_swap(&destination, &order_number)?;
+            perform_swap(&destination, &order_number, &mut on_log)?;
             completed += 1.0;
             on_progress(completed / total_ops, None, Some("swap".to_string()));
         }
@@ -113,6 +128,7 @@ where
                 return Err("Cancelled".to_string());
             }
             create_no_compression_zip(folder)?;
+            on_log("success", format!("Created ZIP for {}", folder.display()));
             fs::remove_dir_all(folder)
                 .map_err(|e| format!("Error removing folder {}: {e}", folder.display()))?;
             completed += 1.0;
@@ -123,38 +139,94 @@ where
     Ok(copies_folder)
 }
 
-fn process_files(folder: &Path, base_text: &str, order_number: &str) -> Result<(), String> {
+fn process_files(
+    folder: &Path,
+    base_text: &str,
+    order_number: &str,
+    on_log: &mut impl FnMut(&str, String),
+) -> Result<(), String> {
     let files = fs_utils::get_supported_files(folder);
     let encoded_text = format!("{base_text} {order_number}");
     let encoded_watermark = encoding::encode_text(&encoded_text);
     let watermark_text = encoding::add_watermark(&encoded_text);
 
     for file in files {
-        if fs_utils::is_video_file(&file) {
-            let _ = watermark::add_watermark(&file, &encoded_watermark)?;
-        } else {
+        if file
+            .extension()
+            .and_then(|ext| ext.to_str())
+            .map(|ext| ext.eq_ignore_ascii_case("txt"))
+            .unwrap_or(false)
+        {
             let _ = encoding::process_file(&file, &watermark_text)?;
+            on_log("info", format!("Encoded text watermark in {}", file.display()));
+        } else if fs_utils::is_video_file(&file) || fs_utils::is_image_file(&file) {
+            let _ = watermark::add_watermark(&file, &encoded_watermark)?;
+            on_log("info", format!("Added invisible watermark to {}", file.display()));
+        } else {
+            // For other binary-safe supported formats, also use tail watermark.
+            let _ = watermark::add_watermark(&file, &encoded_watermark)?;
+            on_log("info", format!("Added tail watermark to {}", file.display()));
         }
     }
 
     Ok(())
 }
 
-fn add_visible_watermark_to_photo(folder: &Path, watermark_text: &str, photo_number: u32) -> Result<(), String> {
+fn add_visible_watermark_to_photo(
+    folder: &Path,
+    watermark_text: &str,
+    photo_number: u32,
+    style: VisibleWatermarkStyle,
+    on_log: &mut impl FnMut(&str, String),
+) -> Result<(), String> {
     let files = fs_utils::get_supported_files(folder);
+    let mut applied = false;
     for file in files.into_iter().filter(|p| fs_utils::is_image_file(p)) {
         if extract_file_number(file.file_name().and_then(|n| n.to_str()).unwrap_or_default())
             == Some(photo_number)
         {
-            let _ =
-                super::image_text::add_text_to_image(&file, watermark_text, TextPosition::BottomRight)?;
+            let _ = super::image_text::add_text_to_image_with_style(
+                &file,
+                watermark_text,
+                TextPosition::BottomRight,
+                style,
+            )?;
+            on_log("success", format!("Added visible watermark to {}", file.display()));
+            applied = true;
             break;
+        }
+    }
+    if !applied {
+        if let Some(first_image) = fs_utils::get_supported_files(folder)
+            .into_iter()
+            .find(|p| fs_utils::is_image_file(p))
+        {
+            let _ = super::image_text::add_text_to_image_with_style(
+                &first_image,
+                watermark_text,
+                TextPosition::BottomRight,
+                style,
+            )?;
+            on_log(
+                "warn",
+                format!(
+                    "Photo number {} not found, fallback visible watermark to {}",
+                    photo_number,
+                    first_image.display()
+                ),
+            );
+        } else {
+            on_log("warn", format!("No images found in {} for visible watermark", folder.display()));
         }
     }
     Ok(())
 }
 
-fn perform_swap(folder: &Path, order_number: &str) -> Result<(), String> {
+fn perform_swap(
+    folder: &Path,
+    order_number: &str,
+    on_log: &mut impl FnMut(&str, String),
+) -> Result<(), String> {
     let base_number: u32 = order_number.parse().unwrap_or(1);
     let swap_number = base_number + 10;
     let all_images: Vec<PathBuf> = fs_utils::get_supported_files(folder)
@@ -173,6 +245,12 @@ fn perform_swap(folder: &Path, order_number: &str) -> Result<(), String> {
 
     if let (Some(a), Some(b)) = (file_a, file_b) {
         swap_files(&a, &b)?;
+        on_log("success", format!("Swapped files: {} <-> {}", a.display(), b.display()));
+    } else {
+        on_log(
+            "warn",
+            format!("No swap pair found in {} for order {}", folder.display(), order_number),
+        );
     }
     Ok(())
 }
@@ -239,6 +317,112 @@ fn extract_file_number(filename: &str) -> Option<u32> {
     re.captures(filename)
         .and_then(|c| c.get(1))
         .and_then(|m| m.as_str().parse::<u32>().ok())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::TempDir;
+
+    // ── extract_start_number ─────────────────────────────────────────────────
+
+    #[test]
+    fn extract_start_number_from_order_string() {
+        assert_eq!(extract_start_number("ORDER 007"), 7);
+        assert_eq!(extract_start_number("batch 100"), 100);
+        assert_eq!(extract_start_number("001"), 1);
+    }
+
+    #[test]
+    fn extract_start_number_defaults_to_one() {
+        assert_eq!(extract_start_number("no numbers here!"), 1);
+        assert_eq!(extract_start_number(""), 1);
+    }
+
+    #[test]
+    fn extract_start_number_uses_trailing_digits() {
+        // "ORDER 12" → trailing number is 12
+        assert_eq!(extract_start_number("ORDER 12"), 12);
+    }
+
+    // ── extract_file_number ──────────────────────────────────────────────────
+
+    #[test]
+    fn extract_file_number_from_filename() {
+        assert_eq!(extract_file_number("photo_001.jpg"), Some(1));
+        assert_eq!(extract_file_number("img42.png"), Some(42));
+        assert_eq!(extract_file_number("007_cover.jpg"), Some(7));
+    }
+
+    #[test]
+    fn extract_file_number_returns_none_for_no_digits() {
+        assert_eq!(extract_file_number("cover.jpg"), None);
+        assert_eq!(extract_file_number(""), None);
+    }
+
+    // ── swap_files ────────────────────────────────────────────────────────────
+
+    #[test]
+    fn swap_files_exchanges_content() {
+        let dir = TempDir::new().unwrap();
+        let a = dir.path().join("a.txt");
+        let b = dir.path().join("b.txt");
+        std::fs::write(&a, b"AAA").unwrap();
+        std::fs::write(&b, b"BBB").unwrap();
+        swap_files(&a, &b).unwrap();
+        assert_eq!(std::fs::read(&a).unwrap(), b"BBB");
+        assert_eq!(std::fs::read(&b).unwrap(), b"AAA");
+    }
+
+    // ── create_no_compression_zip ─────────────────────────────────────────────
+
+    #[test]
+    fn zip_is_created_and_contains_files() {
+        let dir = TempDir::new().unwrap();
+        let folder = dir.path().join("bundle");
+        std::fs::create_dir(&folder).unwrap();
+        std::fs::write(folder.join("file1.txt"), b"hello").unwrap();
+        std::fs::write(folder.join("file2.jpg"), b"fakeimg").unwrap();
+
+        create_no_compression_zip(&folder).unwrap();
+
+        let zip_path = dir.path().join("bundle.zip");
+        assert!(zip_path.exists(), "zip file should be created");
+        let zip_size = std::fs::metadata(&zip_path).unwrap().len();
+        assert!(zip_size > 0, "zip file should not be empty");
+    }
+
+    // ── perform_batch_copy_and_encode (smoke test) ────────────────────────────
+
+    #[test]
+    fn batch_creates_copies_folder_and_subfolders() {
+        let src = TempDir::new().unwrap();
+        std::fs::write(src.path().join("data.txt"), b"content").unwrap();
+
+        let opts = BatchOptions {
+            source_folder: src.path().to_path_buf(),
+            num_copies: 2,
+            base_text: "ORDER 001".to_string(),
+            add_swap: false,
+            add_watermark: false,
+            create_zip: false,
+            watermark_text: None,
+            photo_number: None,
+            visible_size: None,
+            visible_opacity: None,
+        };
+
+        let copies_folder =
+            perform_batch_copy_and_encode(opts, |_, _, _| {}, |_, _| {}, || false).unwrap();
+
+        assert!(copies_folder.exists());
+        // Two order subfolders: 001, 002
+        assert!(copies_folder.join("001").exists());
+        assert!(copies_folder.join("002").exists());
+
+        // Clean up the copies folder (it lives next to the temp dir)
+        let _ = std::fs::remove_dir_all(&copies_folder);
+    }
 }
 
 fn extract_start_number(text: &str) -> u32 {

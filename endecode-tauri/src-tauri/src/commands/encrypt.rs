@@ -5,7 +5,7 @@ use tauri::AppHandle;
 use uuid::Uuid;
 
 use crate::{
-    core::{encoding, fs_utils},
+    core::{encoding, fs_utils, watermark},
     events::{emit_done, emit_log, emit_progress, now_iso, JobDoneEvent, JobLogEvent, JobProgressEvent, LogLevel},
     state::AppState,
 };
@@ -38,87 +38,104 @@ pub async fn encrypt_folder(
 
     let job_id = Uuid::new_v4().to_string();
     state.register_job(&job_id);
+    let state = state.inner().clone();
     let files = fs_utils::get_supported_files(&folder);
     let total_files = files.len();
-    let watermark = encoding::add_watermark(&payload.inject_name);
+    let text_watermark = encoding::add_watermark(&payload.inject_name);
+    let encoded_text = encoding::encode_text(&payload.inject_name);
 
-    emit_log(
-        &app,
-        JobLogEvent {
-            job_id: job_id.clone(),
-            level: LogLevel::Info,
-            message: format!("Starting encryption, files: {total_files}"),
-            ts: now_iso(),
-        },
-    );
-
-    for (index, file) in files.iter().enumerate() {
-        if state.is_cancelled(&job_id) {
-            emit_done(
-                &app,
-                JobDoneEvent {
-                    job_id: job_id.clone(),
-                    status: "cancelled".to_string(),
-                    summary: None,
-                    error: None,
-                },
-            );
-            state.finish_job(&job_id);
-            return Ok(EncryptResponse { job_id, total_files });
-        }
-
-        let result = encoding::process_file(file, &watermark);
-        match result {
-            Ok(true) => emit_log(
-                &app,
-                JobLogEvent {
-                    job_id: job_id.clone(),
-                    level: LogLevel::Success,
-                    message: format!("{}: Success", file.display()),
-                    ts: now_iso(),
-                },
-            ),
-            Ok(false) => emit_log(
-                &app,
-                JobLogEvent {
-                    job_id: job_id.clone(),
-                    level: LogLevel::Warn,
-                    message: format!("{}: Already contains watermark", file.display()),
-                    ts: now_iso(),
-                },
-            ),
-            Err(err) => emit_log(
-                &app,
-                JobLogEvent {
-                    job_id: job_id.clone(),
-                    level: LogLevel::Error,
-                    message: format!("{}: {err}", file.display()),
-                    ts: now_iso(),
-                },
-            ),
-        }
-
-        let progress = (index + 1) as f32 / total_files.max(1) as f32;
-        emit_progress(
-            &app,
-            JobProgressEvent {
-                job_id: job_id.clone(),
-                progress,
-                current_file: Some(file.display().to_string()),
-                stage: Some("encrypt".to_string()),
+    let app_clone = app.clone();
+    let job_id_clone = job_id.clone();
+    tauri::async_runtime::spawn(async move {
+        emit_log(
+            &app_clone,
+            JobLogEvent {
+                job_id: job_id_clone.clone(),
+                level: LogLevel::Info,
+                message: format!("Starting encryption, files: {total_files}"),
+                ts: now_iso(),
             },
         );
-    }
 
-    emit_done(
-        &app,
-        JobDoneEvent {
-            job_id: job_id.clone(),
-            status: "ok".to_string(),
-            summary: Some(serde_json::json!({ "total_files": total_files })),
-            error: None,
-        },
-    );
-    state.finish_job(&job_id);
+        for (index, file) in files.iter().enumerate() {
+            if state.is_cancelled(&job_id_clone) {
+                emit_done(
+                    &app_clone,
+                    JobDoneEvent {
+                        job_id: job_id_clone.clone(),
+                        status: "cancelled".to_string(),
+                        summary: None,
+                        error: None,
+                    },
+                );
+                state.finish_job(&job_id_clone);
+                return;
+            }
+
+            // Keep text-file behavior and use byte-tail watermark for binary media files.
+            let result = if file
+                .extension()
+                .and_then(|ext| ext.to_str())
+                .map(|ext| ext.eq_ignore_ascii_case("txt"))
+                .unwrap_or(false)
+            {
+                encoding::process_file(file, &text_watermark)
+            } else {
+                watermark::add_watermark(file, &encoded_text)
+            };
+            match result {
+                Ok(true) => emit_log(
+                    &app_clone,
+                    JobLogEvent {
+                        job_id: job_id_clone.clone(),
+                        level: LogLevel::Success,
+                        message: format!("{}: Success", file.display()),
+                        ts: now_iso(),
+                    },
+                ),
+                Ok(false) => emit_log(
+                    &app_clone,
+                    JobLogEvent {
+                        job_id: job_id_clone.clone(),
+                        level: LogLevel::Warn,
+                        message: format!("{}: Already contains watermark", file.display()),
+                        ts: now_iso(),
+                    },
+                ),
+                Err(err) => emit_log(
+                    &app_clone,
+                    JobLogEvent {
+                        job_id: job_id_clone.clone(),
+                        level: LogLevel::Error,
+                        message: format!("{}: {err}", file.display()),
+                        ts: now_iso(),
+                    },
+                ),
+            }
+
+            let progress = (index + 1) as f32 / total_files.max(1) as f32;
+            emit_progress(
+                &app_clone,
+                JobProgressEvent {
+                    job_id: job_id_clone.clone(),
+                    progress,
+                    current_file: Some(file.display().to_string()),
+                    stage: Some("encrypt".to_string()),
+                },
+            );
+        }
+
+        emit_done(
+            &app_clone,
+            JobDoneEvent {
+                job_id: job_id_clone.clone(),
+                status: "ok".to_string(),
+                summary: Some(serde_json::json!({ "total_files": total_files })),
+                error: None,
+            },
+        );
+        state.finish_job(&job_id_clone);
+    });
+
     Ok(EncryptResponse { job_id, total_files })
 }
