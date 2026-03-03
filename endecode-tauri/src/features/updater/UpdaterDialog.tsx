@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { relaunch } from "@tauri-apps/plugin-process";
 import { ActionButton } from "../../components/ui/ActionButton";
 import { checkForUpdate, installUpdate, type UpdateCheckResult } from "../../lib/tauriApi";
 
@@ -40,10 +39,6 @@ export function UpdaterDialog({ open, onClose }: Props) {
       setErrorMsg(String(e));
       setPhase("error");
     }
-  }
-
-  async function handleRestart() {
-    await relaunch();
   }
 
   return (
@@ -110,7 +105,8 @@ export function UpdaterDialog({ open, onClose }: Props) {
             <div className="space-y-2">
               <p className="text-sm text-green-400">✓ Update installed successfully!</p>
               <p className="text-xs text-slate-400">
-                Restart the app to start using the new version.
+                Please <strong className="text-slate-300">quit and reopen</strong> the app
+                to start using the new version.
               </p>
             </div>
           )}
@@ -126,12 +122,9 @@ export function UpdaterDialog({ open, onClose }: Props) {
         {/* Footer */}
         <div className="mt-5 flex justify-end gap-2">
           {phase === "done" ? (
-            <>
-              <ActionButton onClick={onClose}>Later</ActionButton>
-              <ActionButton variant="primary" onClick={handleRestart}>
-                Restart Now
-              </ActionButton>
-            </>
+            <ActionButton variant="primary" onClick={onClose}>
+              Close &amp; restart manually
+            </ActionButton>
           ) : phase === "found" ? (
             <>
               <ActionButton onClick={onClose}>Skip</ActionButton>
