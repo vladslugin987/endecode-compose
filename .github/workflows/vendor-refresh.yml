@@ -1,0 +1,37 @@
+name: Refresh Rust Vendor Bundle
+
+on:
+  workflow_dispatch:
+
+jobs:
+  vendor:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: endecode-tauri/src-tauri
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Generate lock file
+        run: cargo generate-lockfile
+
+      - name: Build vendor bundle
+        run: |
+          mkdir -p vendor-bundle/.cargo
+          cargo vendor vendor > vendor-bundle/.cargo/config.toml
+          cp -R vendor vendor-bundle/vendor
+          cp Cargo.lock vendor-bundle/Cargo.lock
+          cp Cargo.toml vendor-bundle/Cargo.toml
+
+      - name: Upload vendor artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: endecode-tauri-rust-vendor
+          path: endecode-tauri/src-tauri/vendor-bundle
+          if-no-files-found: error
+          compression-level: 0

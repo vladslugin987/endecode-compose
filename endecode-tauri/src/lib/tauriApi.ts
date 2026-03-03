@@ -1,0 +1,40 @@
+import { invoke } from "@tauri-apps/api/core";
+
+export type EncryptResponse = { job_id: string; total_files: number };
+export type DecryptResponse = { job_id: string; total_files: number };
+export type BatchResponse = { job_id: string; output_folder: string };
+export type AddTextResponse = { job_id: string; matched_files: number; updated_files: number };
+export type CancelResponse = { cancelled: boolean };
+
+export async function encryptFolder(payload: { folder_path: string; inject_name: string }) {
+  return invoke<EncryptResponse>("encrypt_folder", { payload });
+}
+
+export async function decryptFolder(payload: { folder_path: string }) {
+  return invoke<DecryptResponse>("decrypt_folder", { payload });
+}
+
+export async function batchCopy(payload: {
+  source_folder: string;
+  num_copies: number;
+  base_text: string;
+  add_swap: boolean;
+  add_watermark: boolean;
+  create_zip: boolean;
+  watermark_text?: string;
+  photo_number?: number;
+}) {
+  return invoke<BatchResponse>("batch_copy", { payload });
+}
+
+export async function addTextToPhoto(payload: {
+  folder_path: string;
+  text: string;
+  photo_number: number;
+}) {
+  return invoke<AddTextResponse>("add_text_to_photo", { payload });
+}
+
+export async function cancelJob(payload: { job_id: string }) {
+  return invoke<CancelResponse>("cancel_job", { payload });
+}
