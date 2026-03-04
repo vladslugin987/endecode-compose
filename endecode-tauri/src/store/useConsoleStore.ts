@@ -9,6 +9,10 @@ type ConsoleState = {
 
 export const useConsoleStore = create<ConsoleState>((set) => ({
   logs: [],
-  pushLog: (log) => set((state) => ({ logs: [...state.logs, log] })),
+  pushLog: (log) =>
+    set((state) => {
+      const next = [...state.logs, log];
+      return { logs: next.length > 500 ? next.slice(-500) : next };
+    }),
   clear: () => set({ logs: [] }),
 }));

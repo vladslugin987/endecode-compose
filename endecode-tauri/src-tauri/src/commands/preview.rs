@@ -15,6 +15,7 @@ pub struct PreviewRequest {
 pub struct PreviewResponse {
     pub image_path: Option<String>,
     pub image_data_url: Option<String>,
+    pub file_count: usize,
 }
 
 #[tauri::command]
@@ -24,10 +25,14 @@ pub async fn preview_first_image(payload: PreviewRequest) -> Result<PreviewRespo
         return Ok(PreviewResponse {
             image_path: None,
             image_data_url: None,
+            file_count: 0,
         });
     }
 
-    let first = fs_utils::get_supported_files(&folder)
+    let all_files = fs_utils::get_supported_files(&folder);
+    let file_count = all_files.len();
+
+    let first = all_files
         .into_iter()
         .filter(|p| fs_utils::is_image_file(p))
         .min_by_key(|p| p.file_name().map(|v| v.to_os_string()));
@@ -37,12 +42,14 @@ pub async fn preview_first_image(payload: PreviewRequest) -> Result<PreviewRespo
         return Ok(PreviewResponse {
             image_path: Some(path.display().to_string()),
             image_data_url: data_url,
+            file_count,
         });
     }
 
     Ok(PreviewResponse {
         image_path: None,
         image_data_url: None,
+        file_count,
     })
 }
 

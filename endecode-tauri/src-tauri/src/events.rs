@@ -46,6 +46,11 @@ pub fn emit_done(app: &AppHandle, payload: JobDoneEvent) {
     let _ = app.emit("job://done", payload);
 }
 
+/// Returns Unix time in milliseconds as a string.
+/// JavaScript can parse it with `new Date(Number(str))`.
 pub fn now_iso() -> String {
-    format!("{:?}", std::time::SystemTime::now())
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis().to_string())
+        .unwrap_or_else(|_| "0".to_string())
 }

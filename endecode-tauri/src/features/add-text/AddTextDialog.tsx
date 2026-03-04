@@ -147,7 +147,7 @@ export function AddTextDialog({ open, onClose, onConfirm, selectedPath }: Props)
           <WatermarkPreview
             selectedPath={selectedPath}
             text={text}
-            size="small"
+            scale={parsedScale}
             opacity={parsedOpacity}
           />
         </div>

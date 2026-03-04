@@ -3,7 +3,16 @@ import { ActionButton } from "../../components/ui/ActionButton";
 import { TextInput } from "../../components/ui/TextInput";
 import { useOperationsStore } from "../../store/useOperationsStore";
 import { useConsoleStore } from "../../store/useConsoleStore";
-import { addTextToPhoto, addVideoWatermark, batchCopy, cancelJob, decryptFolder, encryptFolder } from "../../lib/tauriApi";
+import { useToastStore } from "../../store/useToastStore";
+import {
+  addTextToPhoto,
+  addVideoWatermark,
+  batchCopy,
+  cancelJob,
+  decryptFolder,
+  encryptFolder,
+  openFolder,
+} from "../../lib/tauriApi";
 import { BatchDialog } from "../batch/BatchDialog";
 import { AddTextDialog } from "../add-text/AddTextDialog";
 import { VideoWatermarkDialog } from "../video-watermark/VideoWatermarkDialog";
@@ -17,12 +26,16 @@ export function OperationsPanel() {
   const isProcessing = useOperationsStore((s) => s.isProcessing);
   const progress = useOperationsStore((s) => s.progress);
   const activeJobId = useOperationsStore((s) => s.activeJobId);
+  const lastDone = useOperationsStore((s) => s.lastDone);
   const pushLog = useConsoleStore((s) => s.pushLog);
+  const showToast = useToastStore((s) => s.show);
 
   const [showBatch, setShowBatch] = useState(false);
   const [showAddText, setShowAddText] = useState(false);
   const [showVideoWatermark, setShowVideoWatermark] = useState(false);
   const [showUpdater, setShowUpdater] = useState(false);
+  // Track last output folder (set by batch, others use selectedPath)
+  const [lastOutputFolder, setLastOutputFolder] = useState<string | null>(null);
 
   function ensurePath() {
     if (!selectedPath) {
@@ -31,6 +44,14 @@ export function OperationsPanel() {
     }
     return true;
   }
+
+  // Output folder to open: batch sets a dedicated output folder, others open the selected folder
+  const outputFolderPath =
+    (lastDone?.summary?.output_folder as string | undefined) ??
+    lastOutputFolder ??
+    selectedPath;
+
+  const showOpenFolder = lastDone?.status === "ok" && !isProcessing && outputFolderPath;
 
   return (
     <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-4">
@@ -46,8 +67,10 @@ export function OperationsPanel() {
               pushLog({ jobId: "system", level: "error", message: "Error: Name to inject is empty", ts: new Date().toISOString() });
               return;
             }
+            setLastOutputFolder(null);
             const result = await encryptFolder({ folder_path: selectedPath, inject_name: nameToInject });
             startJob(result.job_id);
+            showToast(`Encrypt started — ${result.total_files} files`, "info");
           }}
         >
           ENCRYPT
@@ -57,8 +80,10 @@ export function OperationsPanel() {
           disabled={isProcessing}
           onClick={async () => {
             if (!ensurePath()) return;
+            setLastOutputFolder(null);
             const result = await decryptFolder({ folder_path: selectedPath });
             startJob(result.job_id);
+            showToast(`Decrypt started — ${result.total_files} files`, "info");
           }}
         >
           DECRYPT
@@ -90,6 +115,7 @@ export function OperationsPanel() {
         </ActionButton>
       </div>
 
+      {/* Progress bar */}
       <div className="mt-3 flex items-center gap-3">
         <div className="h-2 flex-1 overflow-hidden rounded bg-slate-800">
           <div className="h-full bg-cyan-500 transition-all" style={{ width: `${Math.round(progress * 100)}%` }} />
@@ -97,6 +123,25 @@ export function OperationsPanel() {
         <div className="w-14 text-right text-xs text-slate-400">{Math.round(progress * 100)}%</div>
       </div>
 
+      {/* Open output folder — appears after successful job */}
+      {showOpenFolder && (
+        <div className="mt-3">
+          <ActionButton
+            variant="primary"
+            onClick={async () => {
+              try {
+                await openFolder(outputFolderPath);
+              } catch (err) {
+                showToast(`Cannot open folder: ${String(err)}`, "error");
+              }
+            }}
+          >
+            📂 Open Output Folder
+          </ActionButton>
+        </div>
+      )}
+
+      {/* Cancel */}
       {activeJobId && (
         <div className="mt-3">
           <ActionButton
@@ -116,11 +161,14 @@ export function OperationsPanel() {
         selectedPath={selectedPath}
         onConfirm={async (payload) => {
           if (!ensurePath()) return;
+          setLastOutputFolder(null);
           const result = await batchCopy({
             source_folder: selectedPath,
             ...payload,
           });
+          setLastOutputFolder(result.output_folder);
           startJob(result.job_id);
+          showToast(`Batch started — ${payload.num_copies} copies`, "info");
         }}
       />
 
@@ -130,6 +178,7 @@ export function OperationsPanel() {
         selectedPath={selectedPath}
         onConfirm={async (text, photoNumber, scale, opacity) => {
           if (!ensurePath()) return;
+          setLastOutputFolder(null);
           const result = await addTextToPhoto({
             folder_path: selectedPath,
             text,
@@ -138,6 +187,7 @@ export function OperationsPanel() {
             visible_opacity: opacity,
           });
           startJob(result.job_id);
+          showToast("Add Text started", "info");
         }}
       />
 
@@ -146,6 +196,7 @@ export function OperationsPanel() {
         onClose={() => setShowVideoWatermark(false)}
         onConfirm={async (text, timestampSec, fontSize) => {
           if (!ensurePath()) return;
+          setLastOutputFolder(null);
           const result = await addVideoWatermark({
             folder_path: selectedPath,
             text,
@@ -153,6 +204,7 @@ export function OperationsPanel() {
             font_size: fontSize,
           });
           startJob(result.job_id);
+          showToast("Video Watermark started", "info");
         }}
       />
 

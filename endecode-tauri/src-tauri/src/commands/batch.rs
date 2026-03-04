@@ -5,7 +5,10 @@ use tauri::AppHandle;
 use uuid::Uuid;
 
 use crate::{
-    core::batch::{self, BatchOptions},
+    core::{
+        batch::{self, BatchOptions},
+        video_watermark,
+    },
     events::{emit_done, emit_log, emit_progress, now_iso, JobDoneEvent, JobLogEvent, JobProgressEvent, LogLevel},
     state::AppState,
 };
@@ -22,6 +25,13 @@ pub struct BatchRequest {
     pub photo_number: Option<u32>,
     pub visible_size: Option<String>,
     pub visible_opacity: Option<u8>,
+    /// Direct pixel scale (1–24) for the visible watermark. Overrides visible_size.
+    pub visible_scale: Option<u32>,
+    /// Burn a tiny visible watermark into video frames using FFmpeg.
+    pub add_video_watermark: Option<bool>,
+    pub video_watermark_text: Option<String>,
+    pub video_watermark_timestamp_sec: Option<f64>,
+    pub video_watermark_font_size: Option<u32>,
 }
 
 #[derive(Debug, Serialize)]
@@ -66,6 +76,20 @@ pub async fn batch_copy(
         },
     );
 
+    // Resolve FFmpeg paths once (needed for video watermark)
+    let ffmpeg_path = if payload.add_video_watermark.unwrap_or(false) {
+        let p = video_watermark::find_ffmpeg(&app);
+        Some(p)
+    } else {
+        None
+    };
+    let ffprobe_path = if payload.add_video_watermark.unwrap_or(false) {
+        let p = video_watermark::find_ffprobe(&app);
+        Some(p)
+    } else {
+        None
+    };
+
     let options = BatchOptions {
         source_folder: source_folder.clone(),
         num_copies: payload.num_copies,
@@ -77,6 +101,13 @@ pub async fn batch_copy(
         photo_number: payload.photo_number,
         visible_size: payload.visible_size,
         visible_opacity: payload.visible_opacity,
+        visible_scale: payload.visible_scale,
+        add_video_watermark: payload.add_video_watermark.unwrap_or(false),
+        video_watermark_text: payload.video_watermark_text,
+        video_watermark_timestamp_sec: payload.video_watermark_timestamp_sec,
+        video_watermark_font_size: payload.video_watermark_font_size,
+        ffmpeg_path,
+        ffprobe_path,
     };
 
     let app_clone = app.clone();

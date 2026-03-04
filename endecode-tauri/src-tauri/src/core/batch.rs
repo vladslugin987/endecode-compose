@@ -10,6 +10,7 @@ use zip::{write::SimpleFileOptions, CompressionMethod, ZipWriter};
 use super::{
     encoding, fs_utils,
     image_text::{TextPosition, VisibleWatermarkSize, VisibleWatermarkStyle},
+    video_watermark::{self, VideoWatermarkOptions},
     watermark,
 };
 
@@ -25,6 +26,16 @@ pub struct BatchOptions {
     pub photo_number: Option<u32>,
     pub visible_size: Option<String>,
     pub visible_opacity: Option<u8>,
+    /// Direct pixel scale (1–24) for the visible photo watermark. Overrides visible_size.
+    pub visible_scale: Option<u32>,
+    /// Whether to also burn a tiny visible watermark into video files using FFmpeg.
+    pub add_video_watermark: bool,
+    pub video_watermark_text: Option<String>,
+    pub video_watermark_timestamp_sec: Option<f64>,
+    pub video_watermark_font_size: Option<u32>,
+    /// Paths to ffmpeg/ffprobe binaries (required when add_video_watermark is true).
+    pub ffmpeg_path: Option<PathBuf>,
+    pub ffprobe_path: Option<PathBuf>,
 }
 
 pub fn perform_batch_copy_and_encode<F, C>(
@@ -66,6 +77,9 @@ where
     if options.add_swap {
         total_ops += options.num_copies as f32;
     }
+    if options.add_video_watermark {
+        total_ops += options.num_copies as f32;
+    }
     if options.create_zip {
         total_ops += options.num_copies as f32;
     }
@@ -96,7 +110,7 @@ where
         let style = VisibleWatermarkStyle {
             size: VisibleWatermarkSize::from_optional_str(options.visible_size.as_deref()),
             opacity: options.visible_opacity.unwrap_or(200).clamp(30, 255),
-            scale_override: None,
+            scale_override: options.visible_scale.map(|s| s.clamp(1, 24)),
         };
         process_files(&destination, &base_text_without_number, &order_number, &mut on_log)?;
         completed += 1.0;
@@ -117,6 +131,34 @@ where
             perform_swap(&destination, &order_number, &mut on_log)?;
             completed += 1.0;
             on_progress(completed / total_ops, None, Some("swap".to_string()));
+        }
+
+        if options.add_video_watermark {
+            if let Some(ffmpeg) = &options.ffmpeg_path {
+                let ffprobe = options.ffprobe_path.as_deref().unwrap_or(ffmpeg.as_path());
+                let vw_text = options
+                    .video_watermark_text
+                    .clone()
+                    .unwrap_or_else(|| order_number.clone());
+                let vw_opts = VideoWatermarkOptions {
+                    text: vw_text.clone(),
+                    timestamp_sec: options.video_watermark_timestamp_sec,
+                    font_size: options.video_watermark_font_size.unwrap_or(12),
+                };
+                for video in fs_utils::get_supported_files(&destination)
+                    .into_iter()
+                    .filter(|p| fs_utils::is_video_file(p))
+                {
+                    match video_watermark::add_video_watermark(ffmpeg, ffprobe, &video, &vw_opts) {
+                        Ok(_) => on_log("success", format!("Video watermark added to {}", video.display())),
+                        Err(e) => on_log("warn", format!("Video watermark failed for {}: {e}", video.display())),
+                    }
+                }
+            } else {
+                on_log("warn", format!("Skipping video watermark for {order_number}: FFmpeg not found"));
+            }
+            completed += 1.0;
+            on_progress(completed / total_ops, None, Some("video_wm".to_string()));
         }
 
         folders_to_zip.push(destination);
@@ -270,6 +312,71 @@ fn swap_files(file_a: &Path, file_b: &Path) -> Result<(), String> {
     Ok(())
 }
 
+/// Returns true for system/metadata files that should NOT be included in the ZIP.
+fn should_skip_in_zip(path: &Path) -> bool {
+    let Some(name) = path.file_name().and_then(|n| n.to_str()) else {
+        return false;
+    };
+    let lower = name.to_lowercase();
+    // Windows metadata, macOS metadata, executables, binary sidecars
+    matches!(
+        lower.as_str(),
+        "desktop.ini"
+            | "thumbs.db"
+            | ".ds_store"
+            | "ffmpeg"
+            | "ffmpeg.exe"
+            | "ffprobe"
+            | "ffprobe.exe"
+    ) || lower.starts_with('.')
+        || lower.ends_with(".exe")
+        || lower.ends_with(".dll")
+}
+
+/// Convert a `SystemTime` to a `zip::DateTime` using manual MS-DOS calendar arithmetic.
+/// Fixes the "1899" display issue caused by unset ZIP timestamps.
+fn zip_dt_from_system_time(t: std::time::SystemTime) -> zip::DateTime {
+    let secs = t
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+
+    let (year, month, day, hour, min, sec) = unix_secs_to_civil(secs);
+
+    if (1980..=2107).contains(&year) {
+        let dos_date = (((year - 1980) as u16) << 9) | ((month as u16) << 5) | (day as u16);
+        let dos_time = ((hour as u16) << 11) | ((min as u16) << 5) | ((sec / 2) as u16);
+        if let Ok(dt) = zip::DateTime::try_from((dos_date, dos_time)) {
+            return dt;
+        }
+    }
+    // Fallback: current time (guaranteed valid)
+    zip::DateTime::default_for_write()
+}
+
+/// Decompose a Unix timestamp (seconds since 1970-01-01 UTC) into (year, month, day, hour, min, sec).
+/// Uses the Gregorian calendar algorithm via Julian Day Numbers (no external crate needed).
+fn unix_secs_to_civil(unix_secs: u64) -> (u32, u32, u32, u32, u32, u32) {
+    let time_of_day = unix_secs % 86400;
+    let h = (time_of_day / 3600) as u32;
+    let m = ((time_of_day % 3600) / 60) as u32;
+    let s = (time_of_day % 60) as u32;
+
+    // Julian Day Number: 1970-01-01 = JDN 2440588
+    let jdn = (unix_secs / 86400) as i64 + 2_440_588;
+
+    // Gregorian calendar algorithm (Richards 2013)
+    let f = jdn + 1401 + (((4 * jdn + 274_277) / 146_097) * 3) / 4 - 38;
+    let e = 4 * f + 3;
+    let g = (e % 1461) / 4;
+    let h2 = 5 * g + 2;
+    let day = (h2 % 153) / 5 + 1;
+    let month = (h2 / 153 + 2) % 12 + 1;
+    let year = e / 1461 - 4716 + (14 - month) / 12;
+
+    (year as u32, month as u32, day as u32, h, m, s)
+}
+
 fn create_no_compression_zip(folder_to_zip: &Path) -> Result<(), String> {
     let zip_file = folder_to_zip
         .parent()
@@ -281,10 +388,16 @@ fn create_no_compression_zip(folder_to_zip: &Path) -> Result<(), String> {
     let file = File::create(&zip_file)
         .map_err(|e| format!("Error creating zip {}: {e}", zip_file.display()))?;
     let mut zip = ZipWriter::new(file);
-    let options = SimpleFileOptions::default().compression_method(CompressionMethod::Stored);
+    let base_options = SimpleFileOptions::default().compression_method(CompressionMethod::Stored);
 
     for entry in walkdir::WalkDir::new(folder_to_zip).into_iter().filter_map(Result::ok) {
         let path = entry.path();
+
+        // Skip system / metadata / binary files
+        if path.is_file() && should_skip_in_zip(path) {
+            continue;
+        }
+
         let name = path
             .strip_prefix(folder_to_zip)
             .map_err(|e| format!("Path strip error: {e}"))?
@@ -293,10 +406,19 @@ fn create_no_compression_zip(folder_to_zip: &Path) -> Result<(), String> {
 
         if path.is_dir() {
             if !name.is_empty() {
-                zip.add_directory(format!("{name}/"), options)
+                zip.add_directory(format!("{name}/"), base_options)
                     .map_err(|e| format!("Zip add directory error: {e}"))?;
             }
         } else {
+            // Preserve the file's real modification time (fixes "1899" display).
+            let last_modified = path
+                .metadata()
+                .ok()
+                .and_then(|m| m.modified().ok())
+                .map(zip_dt_from_system_time)
+                .unwrap_or_else(|| zip_dt_from_system_time(std::time::SystemTime::now()));
+
+            let options = base_options.last_modified_time(last_modified);
             zip.start_file(name, options)
                 .map_err(|e| format!("Zip start file error: {e}"))?;
             let mut f = File::open(path).map_err(|e| format!("Open file error: {e}"))?;
@@ -410,6 +532,13 @@ mod tests {
             photo_number: None,
             visible_size: None,
             visible_opacity: None,
+            visible_scale: None,
+            add_video_watermark: false,
+            video_watermark_text: None,
+            video_watermark_timestamp_sec: None,
+            video_watermark_font_size: None,
+            ffmpeg_path: None,
+            ffprobe_path: None,
         };
 
         let copies_folder =

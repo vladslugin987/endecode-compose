@@ -1,9 +1,13 @@
-﻿name: Build Desktop Apps
+name: Build Desktop Apps (Kotlin/Compose — disabled)
 
+# This workflow built the old Kotlin/Compose version.
+# The project has migrated to Tauri — see release.yml instead.
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Type YES to manually run the legacy Kotlin build"
+        required: true
 
 jobs:
   build:

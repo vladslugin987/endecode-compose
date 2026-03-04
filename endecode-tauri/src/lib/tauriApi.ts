@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import { openPath } from "@tauri-apps/plugin-opener";
 
 export type EncryptResponse = { job_id: string; total_files: number };
 export type DecryptResponse = { job_id: string; total_files: number };
@@ -8,7 +9,12 @@ export type CancelResponse = { cancelled: boolean };
 export type PreviewResponse = {
   image_path: string | null;
   image_data_url: string | null;
+  file_count: number;
 };
+
+export async function openFolder(folderPath: string) {
+  return openPath(folderPath);
+}
 
 export async function encryptFolder(payload: { folder_path: string; inject_name: string }) {
   return invoke<EncryptResponse>("encrypt_folder", { payload });
@@ -29,6 +35,12 @@ export async function batchCopy(payload: {
   photo_number?: number;
   visible_size?: "small" | "medium" | "large";
   visible_opacity?: number;
+  /** Direct pixel scale 1–24 for visible watermark. Overrides visible_size. */
+  visible_scale?: number;
+  add_video_watermark?: boolean;
+  video_watermark_text?: string;
+  video_watermark_timestamp_sec?: number;
+  video_watermark_font_size?: number;
 }) {
   return invoke<BatchResponse>("batch_copy", { payload });
 }
