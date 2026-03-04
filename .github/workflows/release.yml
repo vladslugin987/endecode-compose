@@ -89,12 +89,40 @@ jobs:
           tar -xzf src-tauri/vendor-bundle/endecode-tauri-rust-vendor.tar.gz \
               -C src-tauri
 
+      # Normalize signing key format from GitHub Secret:
+      # supports either raw key content (starts with "untrusted comment:")
+      # or one-line base64-encoded key content.
+      - name: Prepare updater signing key
+        shell: bash
+        env:
+          INPUT_SIGNING_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          KEY_FILE: ${{ runner.temp }}/tauri-signing.key
+        run: |
+          set -euo pipefail
+          if [ -z "${INPUT_SIGNING_KEY}" ]; then
+            echo "::error::TAURI_SIGNING_PRIVATE_KEY is empty or missing"
+            exit 1
+          fi
+
+          if printf '%s' "${INPUT_SIGNING_KEY}" | grep -q '^untrusted comment:'; then
+            printf '%s\n' "${INPUT_SIGNING_KEY}" > "${KEY_FILE}"
+          else
+            printf '%s' "${INPUT_SIGNING_KEY}" | base64 --decode > "${KEY_FILE}"
+          fi
+
+          if ! head -n 1 "${KEY_FILE}" | grep -q '^untrusted comment:'; then
+            echo "::error::Decoded signing key has invalid format (missing 'untrusted comment:' header)"
+            exit 1
+          fi
+
+          echo "TAURI_SIGNING_PRIVATE_KEY_PATH=${KEY_FILE}" >> "${GITHUB_ENV}"
+
       # ── Build & publish ───────────────────────────────────────────────────
       - name: Build and publish release
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PATH: ${{ runner.temp }}/tauri-signing.key
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           projectPath: endecode-tauri
