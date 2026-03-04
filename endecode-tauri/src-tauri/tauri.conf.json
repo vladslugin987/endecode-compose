@@ -34,7 +34,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDMxNEJBRUJDMjgwM0Y3RkIKUldUNzl3TW92SzVMTVRGM3BCYUZRYU81UFFTRzltTVlpZnBreE4vT1lVTEsxZ25VLzZLa0UwNGkK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IERBNDlFRDk3QjU4QTNBNDcKUldSSE9vcTFsKzFKMnFCWHFXb3FJSkJBaG5YN0NsajcxVDlXTDR4Rk5xMzlzNUZhSklIQ3M3VXMK",
       "endpoints": [
         "https://github.com/vladslugin987/endecode-compose/releases/latest/download/latest.json"
       ],
