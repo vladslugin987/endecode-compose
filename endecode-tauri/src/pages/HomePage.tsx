@@ -18,11 +18,11 @@ export function HomePage() {
   useEffect(() => {
     if (!lastDone) return;
     if (lastDone.status === "ok") {
-      showToast("✓ Job completed successfully", "success");
+      showToast("Job completed successfully", "success");
     } else if (lastDone.status === "error") {
-      showToast(`✗ ${lastDone.error ?? "Job failed"}`, "error");
+      showToast(`${lastDone.error ?? "Job failed"}`, "error");
     } else if (lastDone.status === "cancelled") {
-      showToast("⚠ Job cancelled", "warn");
+      showToast("Job cancelled", "warn");
     }
   }, [lastDone, showToast]);
 
