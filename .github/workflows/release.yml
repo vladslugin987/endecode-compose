@@ -66,14 +66,11 @@ jobs:
       - name: Install Node dependencies
         run: npm ci
 
-      # Normalize signing key format from GitHub Secret:
-      # supports either raw key content (starts with "untrusted comment:")
-      # or one-line base64-encoded key content.
-      - name: Prepare updater signing key
+      # Expect a one-line base64-encoded secret key in GitHub Secrets.
+      - name: Validate updater signing key format
         shell: bash
         env:
           INPUT_SIGNING_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          KEY_FILE: ${{ runner.temp }}/tauri-signing.key
         run: |
           set -euo pipefail
           if [ -z "${INPUT_SIGNING_KEY}" ]; then
@@ -82,23 +79,24 @@ jobs:
           fi
 
           if printf '%s' "${INPUT_SIGNING_KEY}" | grep -q '^untrusted comment:'; then
-            printf '%s\n' "${INPUT_SIGNING_KEY}" > "${KEY_FILE}"
-          else
-            if ! printf '%s' "${INPUT_SIGNING_KEY}" | base64 --decode > "${KEY_FILE}"; then
-              echo "::error::TAURI_SIGNING_PRIVATE_KEY must be a repository secret containing either the raw key content or a valid one-line base64-encoded key"
-              exit 1
-            fi
+            echo "::error::TAURI_SIGNING_PRIVATE_KEY must contain the one-line base64 content of the .key file, not decoded raw key text"
+            exit 1
           fi
 
-          if ! head -n 1 "${KEY_FILE}" | grep -q '^untrusted comment:'; then
-            echo "::error::Decoded signing key has invalid format (missing 'untrusted comment:' header)"
+          if ! printf '%s' "${INPUT_SIGNING_KEY}" | base64 --decode > "${RUNNER_TEMP}/tauri-signing.key.decoded"; then
+            echo "::error::TAURI_SIGNING_PRIVATE_KEY is not valid base64"
+            exit 1
+          fi
+
+          if ! head -n 1 "${RUNNER_TEMP}/tauri-signing.key.decoded" | grep -q '^untrusted comment: .*secret key'; then
+            echo "::error::Decoded signing key has invalid format (missing secret key header)"
             exit 1
           fi
 
       - name: Validate updater signing key early
         shell: bash
         env:
-          KEY_FILE: ${{ runner.temp }}/tauri-signing.key
+          INPUT_SIGNING_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           KEY_PASSWORD: ${{ env.TAURI_SIGNING_PRIVATE_KEY_PASSWORD_VALUE }}
         run: |
           set -euo pipefail
@@ -106,9 +104,9 @@ jobs:
           printf 'validate updater signing key\n' > "${VALIDATION_FILE}"
 
           if [ -n "${KEY_PASSWORD}" ]; then
-            npm run tauri signer sign -- -k "${KEY_FILE}" -p "${KEY_PASSWORD}" "${VALIDATION_FILE}"
+            npm run tauri signer sign -- -k "${INPUT_SIGNING_KEY}" -p "${KEY_PASSWORD}" "${VALIDATION_FILE}"
           else
-            npm run tauri signer sign -- -k "${KEY_FILE}" "${VALIDATION_FILE}"
+            npm run tauri signer sign -- -k "${INPUT_SIGNING_KEY}" "${VALIDATION_FILE}"
           fi
 
       - name: Setup Rust
@@ -142,7 +140,7 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ runner.temp }}/tauri-signing.key
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
         with:
           projectPath: endecode-tauri
           tagName: ${{ github.ref_name }}
@@ -162,7 +160,7 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ runner.temp }}/tauri-signing.key
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ env.TAURI_SIGNING_PRIVATE_KEY_PASSWORD_VALUE }}
         with:
           projectPath: endecode-tauri
