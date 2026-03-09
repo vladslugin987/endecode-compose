@@ -46,6 +46,8 @@ jobs:
             label: windows
 
     runs-on: ${{ matrix.platform }}
+    env:
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD_VALUE: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
     defaults:
       run:
         working-directory: endecode-tauri
@@ -107,7 +109,10 @@ jobs:
           if printf '%s' "${INPUT_SIGNING_KEY}" | grep -q '^untrusted comment:'; then
             printf '%s\n' "${INPUT_SIGNING_KEY}" > "${KEY_FILE}"
           else
-            printf '%s' "${INPUT_SIGNING_KEY}" | base64 --decode > "${KEY_FILE}"
+            if ! printf '%s' "${INPUT_SIGNING_KEY}" | base64 --decode > "${KEY_FILE}"; then
+              echo "::error::TAURI_SIGNING_PRIVATE_KEY must be a repository secret containing either the raw key content or a valid one-line base64-encoded key"
+              exit 1
+            fi
           fi
 
           if ! head -n 1 "${KEY_FILE}" | grep -q '^untrusted comment:'; then
@@ -115,19 +120,34 @@ jobs:
             exit 1
           fi
 
-          {
-            echo "TAURI_SIGNING_PRIVATE_KEY<<__TAURI_KEY__"
-            cat "${KEY_FILE}"
-            echo "__TAURI_KEY__"
-          } >> "${GITHUB_ENV}"
-
       # ── Build & publish ───────────────────────────────────────────────────
-      - name: Build and publish release
+      - name: Build and publish release (without password)
+        if: env.TAURI_SIGNING_PRIVATE_KEY_PASSWORD_VALUE == ''
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ env.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ runner.temp }}/tauri-signing.key
+        with:
+          projectPath: endecode-tauri
+          tagName: ${{ github.ref_name }}
+          releaseName: "ENDEcode v__VERSION__"
+          releaseBody: |
+            ## What's new
+            See commit history for changes.
+
+            ---
+            **Downloads counted here automatically appear in your GitHub repository statistics.**
+          releaseDraft: false
+          prerelease: false
+          args: --target ${{ matrix.target }}
+
+      - name: Build and publish release (with password)
+        if: env.TAURI_SIGNING_PRIVATE_KEY_PASSWORD_VALUE != ''
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ runner.temp }}/tauri-signing.key
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ env.TAURI_SIGNING_PRIVATE_KEY_PASSWORD_VALUE }}
         with:
           projectPath: endecode-tauri
           tagName: ${{ github.ref_name }}
