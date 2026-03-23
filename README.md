@@ -1,4 +1,4 @@
-# ENDEcode Compose
+# ENDEcode Tauri
 
 
 <div align="center">
@@ -47,7 +47,7 @@ A modern file encryption and watermarking tool built with Compose Multiplatform
 3. Follow the installation wizard
 4. Launch ENDEcode from the Start menu
 
-## 🛠️ Building from Source
+## Building from Source
 
 ```bash
 # Clone the repository
